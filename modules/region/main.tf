@@ -42,20 +42,20 @@ module "ecs" {
   secrets_arns = module.env_vars.secrets_arns
   ecr_repo_names = module.ecr.repo_names 
   ecs_task_role_arns = var.ecs_task_role_arns
-  acm_cert_arn = module.acm.acm_cert_arn
+  acm_cert_arn = module.acm_cert.acm_cert_arn
 }
 
 
-module "acm" {
-  source = "../acm"
+module "acm_cert" {
+  source = "../acm_cert"
   providers = {
     aws = aws
   }
-  region = data.aws_region.region.name
   environment = var.environment
-  domain_name = var.domain_name
-  alb_dns_name = module.ecs.alb_dns_name
-  alb_zone_id = module.ecs.alb_zone_id
+  region = data.aws_region.region.name
+  hosted_zone_id = var.hosted_zone_id
+  domain = var.domain
+  validation_record_fqdns = var.validation_record_fqdns
 }
 
 
@@ -75,6 +75,7 @@ module "env_vars" {
   plaid_client_id = var.plaid_client_id
   db_name_port_host = module.database.db_name_port_host
   email_host_password = var.email_host_password
+  email_host_user = var.email_host_user
   fmp_key = var.fmp_key
 }
 

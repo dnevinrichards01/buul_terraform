@@ -7,7 +7,7 @@ variable "desired_counts_by_service" {
   }
 }
 
-variable "domain_name" {
+variable "domain" {
   type = string
   default = "buul-load-balancer.link"
 }
@@ -17,29 +17,47 @@ variable "db_username" {
   default = "db"
 }
 
+//
+
 variable "plaid_secret" {
   type = string
   sensitive = true
+  default = "00874a8fdeea04e481523dbcb64eb1"
 }
 
 variable "plaid_host" {
   type = string
   sensitive = true
+  default = "https://production.plaid.com"
 }
 
 variable "plaid_client_id" {
   type = string
   sensitive = true
+  default = "671605190a8131001a389fcd"
 }
 
 variable "email_host_password" {
   type = string
   sensitive = true
+  default = "izyaqueugqtaiiwh"
+}
+
+variable "email_host_user" {
+  type = string
+  sensitive = true
+  default = "notifications@bu-ul.com"
 }
 
 variable "fmp_key" {
   type = string
   sensitive = true
+  default = "I43MDWYS5CSPVrNprVkRitsfyA12q4Zc"
 }
 
+variable "regions" {
+  type = list(string)
+  default = ["us-west-1"]
+}
+//
 

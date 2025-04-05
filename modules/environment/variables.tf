@@ -10,7 +10,7 @@ variable "desired_counts_by_service" {
   type = map(number)
 }
 
-variable "domain_name" {
+variable "domain" {
   type        = string
 }
 
@@ -39,7 +39,20 @@ variable "email_host_password" {
   sensitive = true
 }
 
+variable "email_host_user" {
+  type = string
+  sensitive = true
+}
+
 variable "fmp_key" {
   type = string
   sensitive = true
+}
+
+variable "hosted_zone_id" {
+  type = string
+}
+
+variable "validation_record_fqdns" {
+  type = list(string)
 }

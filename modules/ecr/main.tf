@@ -1,6 +1,7 @@
 resource "aws_ecr_repository" "repos" {
   for_each = toset(local.repos)
   name     = "${var.environment}-${each.value}"
+  force_delete = true
 
   image_scanning_configuration {
     scan_on_push = true

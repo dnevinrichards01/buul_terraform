@@ -46,6 +46,11 @@ variable "email_host_password" {
   sensitive = true
 }
 
+variable "email_host_user" {
+  type = string
+  sensitive = true
+}
+
 variable "fmp_key" {
   type = string
   sensitive = true

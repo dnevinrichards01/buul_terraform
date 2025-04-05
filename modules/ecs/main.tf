@@ -65,7 +65,7 @@ resource "aws_ecs_task_definition" "tasks" {
 // alb 
 
 resource "aws_lb" "app" {
-  name               = "my-alb"
+  name               = "${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group_id]

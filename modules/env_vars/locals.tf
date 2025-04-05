@@ -24,7 +24,10 @@ locals {
         username = local.db_username_final,
         password = local.db_password_final
     }
-    EMAIL_CREDENTIALS  = { EMAIL_HOST_PASSWORD = var.email_host_password}
+    EMAIL_CREDENTIALS  = { 
+      EMAIL_HOST_PASSWORD = var.email_host_password,
+      EMAIL_HOST_USER = var.email_host_user
+    }
     PLAID_CREDENTIALS  = {
         PLAID_CLIENT_ID = "var.plaid_client_id",
         PLAID_SECRET = "var.plaid_secret",

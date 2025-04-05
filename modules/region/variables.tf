@@ -14,15 +14,15 @@ variable "ecs_task_role_arns" {
   type = map(string)
 }
 
-variable "domain_name" {
-  type        = string
-}
-
 variable "sqs_access_policy_doc_json" { 
     type = map(string)
 }
 
 variable "db_username" {
+  type = string
+}
+
+variable "domain" {
   type = string
 }
 
@@ -47,8 +47,20 @@ variable "email_host_password" {
   sensitive = true
 }
 
+variable "email_host_user" {
+  type = string
+  sensitive = true
+}
+
 variable "fmp_key" {
   type = string
   sensitive = true
 }
 
+variable "hosted_zone_id" {
+  type = string
+}
+
+variable "validation_record_fqdns" {
+  type = list(string)
+}

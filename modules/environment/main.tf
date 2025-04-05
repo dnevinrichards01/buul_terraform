@@ -5,18 +5,21 @@ module "region_us_west_1" {
     aws = aws.us_west_1
   }
   environment = var.environment
+  domain = var.domain
+  hosted_zone_id = var.hosted_zone_id
   desired_counts_by_service = var.desired_counts_by_service
 
   secret_policy_doc_json = module.iam.secret_policy_doc_json
   ecs_task_role_arns = module.iam.ecs_task_role_arns
-  domain_name = var.domain_name
   sqs_access_policy_doc_json = module.iam.sqs_access_policy_doc_json
   db_username = var.db_username
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
   email_host_password = var.email_host_password
+  email_host_user = var.email_host_user
   plaid_client_id = var.plaid_client_id
+  validation_record_fqdns = var.validation_record_fqdns
 }
 
 module "region_us_west_2" {
@@ -26,21 +29,35 @@ module "region_us_west_2" {
     aws = aws.us_west_2
   }
   environment = var.environment
+  domain = var.domain
+  hosted_zone_id = var.hosted_zone_id
   desired_counts_by_service = var.desired_counts_by_service
 
   secret_policy_doc_json = module.iam.secret_policy_doc_json
   ecs_task_role_arns = module.iam.ecs_task_role_arns
-  domain_name = var.domain_name
   sqs_access_policy_doc_json = module.iam.sqs_access_policy_doc_json
   db_username = var.db_username
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
   email_host_password = var.email_host_password
+  email_host_user = var.email_host_user
   plaid_client_id = var.plaid_client_id
+  validation_record_fqdns = var.validation_record_fqdns
 }
 
-
+module "latency_routing" {
+  source = "../latency_routing"
+  providers = {
+    aws = aws
+  }
+  regions = var.regions
+  environment = var.environment
+  alb_dns_names = local.alb_dns_names
+  alb_zone_ids = local.alb_zone_ids
+  hosted_zone_id = var.hosted_zone_id
+  domain = var.domain
+}
 
 module "codebuild" {
   source = "../codebuild"

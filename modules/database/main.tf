@@ -14,13 +14,13 @@ resource "aws_db_instance" "postgres" {
   port                    = 5432
   publicly_accessible     = false
   skip_final_snapshot     = true
-  deletion_protection     = true
+  deletion_protection     = false//true
   vpc_security_group_ids  = [var.data_security_group_id]
   db_subnet_group_name    = aws_db_subnet_group.postgres.name
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  //lifecycle {
+  //  prevent_destroy = true
+  //}
 }
 
 resource "aws_db_subnet_group" "postgres" {

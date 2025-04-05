@@ -16,9 +16,9 @@ resource "aws_elasticache_replication_group" "redis_no_cluster" {
   at_rest_encryption_enabled    = true
   transit_encryption_enabled    = true
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  //lifecycle {
+  // prevent_destroy = true
+  //}
 }
 
 resource "aws_elasticache_subnet_group" "redis_no_cluster" {
