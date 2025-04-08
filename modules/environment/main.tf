@@ -13,6 +13,7 @@ module "region_us_west_1" {
   ecs_task_role_arns = module.iam.ecs_task_role_arns
   sqs_access_policy_doc_json = module.iam.sqs_access_policy_doc_json
   db_username = var.db_username
+  db_password = var.db_password
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
@@ -37,6 +38,7 @@ module "region_us_west_2" {
   ecs_task_role_arns = module.iam.ecs_task_role_arns
   sqs_access_policy_doc_json = module.iam.sqs_access_policy_doc_json
   db_username = var.db_username
+  db_password = var.db_password
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
@@ -85,4 +87,9 @@ module "iam" {
   environment = var.environment
   regions = var.regions
   codeconnection_arn = module.codebuild.codeconnection_arn
+  vpce_ids = local.vpce_ids
+  ssm_env_arns = module.region_us_west_1[0].ssm_env_arns
+  secret_arns = module.region_us_west_1[0].secret_arns
+  secret_kms_ids = local.secret_kms_ids
+  ssm_kms_ids = local.ssm_kms_ids
 }

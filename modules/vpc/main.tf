@@ -57,6 +57,7 @@ module "subnets_by_az" {
   vpc_id        = aws_vpc.vpc.id
   rt_public_id  = aws_route_table.public.id
   rt_private_id = aws_route_table.private.id
+  igw_id = aws_internet_gateway.igw.id
 }
 
 
@@ -118,6 +119,15 @@ resource "aws_security_group_rule" "app_to_internet" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.app.id
 }
+resource "aws_security_group_rule" "app_to_smtp" {
+  type              = "egress"
+  description       = "Allow app to send emails"
+  from_port         = 587
+  to_port           = 587
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.app.id
+}
 resource "aws_security_group_rule" "app_to_redis" {
   type                     = "egress"
   description              = "Allow app to send requests to redis cache"
@@ -134,16 +144,6 @@ resource "aws_security_group_rule" "app_to_postgres" {
   to_port                  = 5432
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.data.id
-  security_group_id        = aws_security_group.app.id
-}
-// remove
-resource "aws_security_group_rule" "app_accepts_ssh" {
-  type                     = "ingress"
-  description              = "Allow ssh"
-  from_port                = 22
-  to_port                  = 22
-  protocol                 = "tcp"
-  cidr_blocks              = ["0.0.0.0/0"]
   security_group_id        = aws_security_group.app.id
 }
 
@@ -176,17 +176,27 @@ resource "aws_security_group_rule" "data_accepts_psql_app" {
   security_group_id        = aws_security_group.data.id
   source_security_group_id = aws_security_group.app.id
 }
-// maybe remove this later
-resource "aws_security_group_rule" "data_accepts_psql_analytics" {
+
+
+// security group analytics data
+
+resource "aws_security_group" "analyticsdb" {
+  name   = "${var.environment}-sg-analyticsdb"
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.environment}-sg-analyticsdb"
+  }
+}
+resource "aws_security_group_rule" "analyticsdb_accepts_analytics" {
   type                     = "ingress"
-  description              = "Allow psql db to respond to analytics ec2"
+  description              = "Allow analyticsdb ec2 to accept requests from analytics ec2"
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.data.id
   source_security_group_id = aws_security_group.analytics.id
+  security_group_id        = aws_security_group.analyticsdb.id
 }
-
 
 // security group analytics
 
@@ -207,7 +217,7 @@ resource "aws_security_group_rule" "analytics_to_internet_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.analytics.id
 }
-resource "aws_security_group_rule" "analytics_accepts_internet_http" {
+resource "aws_security_group_rule" "analytics_to_internet_http" {
   type              = "egress"
   description       = "Allow analytics ec2 to send requests to internet with HTTPS"
   from_port         = 80
@@ -216,25 +226,105 @@ resource "aws_security_group_rule" "analytics_accepts_internet_http" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.analytics.id
 }
-resource "aws_security_group_rule" "analytics_accepts_ssh" {
-  type                     = "ingress"
-  description              = "Allow ssh"
-  from_port                = 22
-  to_port                  = 22
+resource "aws_security_group_rule" "analytics_to_ssm" {
+  type                     = "egress"
+  description              = "Allow ssm"
+  from_port                = 443
+  to_port                  = 443
   protocol                 = "tcp"
-  cidr_blocks              = ["0.0.0.0/0"]
+  source_security_group_id = aws_security_group.vpce_ssm.id
   security_group_id        = aws_security_group.analytics.id
 }
-// maybe change this later to access a different sg with replica
-resource "aws_security_group_rule" "analytics_to_postgres" {
+resource "aws_security_group_rule" "analytics_to_analyticsdb" {
   type                     = "egress"
-  description              = "Allow analytics ec2 to send requests to psql db"
+  description              = "Allow analytics ec2 to send psql requests to analyticsdb"
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.data.id
+  source_security_group_id = aws_security_group.analyticsdb.id
   security_group_id        = aws_security_group.analytics.id
 }
 
 
+// security group VPCE
+
+resource "aws_security_group" "vpce" {
+  name   = "${var.environment}-sg-vpce"
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.environment}-sg-vpce"
+  }
+}
+resource "aws_security_group_rule" "vpce_accepts_app_requests" {
+  type                     = "ingress"
+  description              = "Allow vpce to respond to app"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.vpce.id
+  source_security_group_id = aws_security_group.app.id
+}
+
+
+// security group VPCE SSM
+ 
+resource "aws_security_group" "vpce_ssm" {
+  name   = "${var.environment}-sg-vpce_ssm"
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.environment}-sg-vpce_ssm"
+  }
+}
+resource "aws_security_group_rule" "vpce_ssm_accepts_app_requests" {
+  type                     = "ingress"
+  description              = "Allow vpce_ssm to respond to app"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.vpce_ssm.id
+  source_security_group_id = aws_security_group.app.id
+}
+resource "aws_security_group_rule" "vpce_ssm_accepts_analytics_requests" {
+  type                     = "ingress"
+  description              = "Allow vpce_ssm to respond to analytics"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.vpce_ssm.id
+  source_security_group_id = aws_security_group.analytics.id
+} 
+
+
+// VPCEs
+
+resource "aws_vpc_endpoint" "interface" {
+  for_each = toset(local.interface_services)
+
+  vpc_id             = aws_vpc.vpc.id
+  service_name       = "com.amazonaws.${var.region}.${each.value}"
+  vpc_endpoint_type  = "Interface"
+  subnet_ids         = local.data_subnet_ids
+  security_group_ids = [aws_security_group.vpce.id]
+
+  private_dns_enabled = true
+  tags = {
+    Name = "${var.environment}-${each.value}-vpce"
+  }
+}
+resource "aws_vpc_endpoint" "interface_ssm" {
+  for_each = toset(local.ssm_interface_services)
+
+  vpc_id             = aws_vpc.vpc.id
+  service_name       = "com.amazonaws.${var.region}.${each.value}"
+  vpc_endpoint_type  = "Interface"
+  subnet_ids         = local.data_subnet_ids
+  security_group_ids = [aws_security_group.vpce_ssm.id]
+
+  private_dns_enabled = true
+  tags = {
+    Name = "${var.environment}-${each.value}-vpce"
+  }
+}
 

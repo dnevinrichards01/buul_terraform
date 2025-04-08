@@ -20,14 +20,9 @@ data "aws_iam_policy_document" "secret_policy_doc" {
   }
 }
 
-
-//assign this to ecs task probably 
-
-resource "aws_iam_policy" "ssm_read_policy" {
-  name   = "ecs-read-env"
-  policy = data.aws_iam_policy_document.ssm_read_policy_doc.json
-}
 data "aws_iam_policy_document" "ssm_read_policy_doc" {
+  for_each = var.ssm_env_arns
+
   dynamic "statement" {
     for_each = toset(var.regions)
     content {
@@ -37,9 +32,19 @@ data "aws_iam_policy_document" "ssm_read_policy_doc" {
         "ssm:GetParameters",
         "ssm:GetParametersByPath"
       ]
-      resources = [
-        "arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/ecs/${var.environment}/*"
-      ]
+      //principals {
+      //  type        = "AWS"
+      //  identifiers = [for task, arn in local.ecs_task_role_arns : arn]
+      //}
+      // ssm params resource policies doesn't allow 'principal'
+      condition {
+        test     = "StringEquals"
+        variable = "aws:sourceVpce"
+        values   = var.vpce_ids["ssm"]
+      }
+      resources = [for arn in var.ssm_env_arns : arn]
     }
   }
 }
+
+

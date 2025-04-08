@@ -43,6 +43,8 @@ resource "aws_iam_role_policy_attachment" "ecs_task_logs" {
   policy_arn = aws_iam_policy.ecs_task_logs[each.value].arn
 } 
 
+
+// kms here too
 data "aws_iam_policy_document" "ecs_exec" {
   for_each = toset(local.containers)
   dynamic "statement" {
@@ -73,6 +75,8 @@ resource "aws_iam_role_policy_attachment" "ecs_exec" {
   policy_arn = aws_iam_policy.ecs_exec[each.value].arn
 } 
 
+
+// kms here too?
 data "aws_iam_policy_document" "ecs_sqs" {
   dynamic "statement" {
     for_each = toset(var.regions)
@@ -112,6 +116,7 @@ resource "aws_iam_role_policy_attachment" "ecs_sqs" {
   policy_arn = aws_iam_policy.ecs_sqs.arn
 } 
 
+
 data "aws_iam_policy_document" "ecs_read_secrets" {
   dynamic "statement" {
     for_each = toset(var.regions)
@@ -119,11 +124,20 @@ data "aws_iam_policy_document" "ecs_read_secrets" {
       effect  = "Allow"
       actions = ["secretsmanager:GetSecretValue"]
       resources = [
-        "*"
-        //"arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:rds!db-3b665cc1-3b69-494f-aef5-ea338c22218d-ck42Wi",
-        //"arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:ab-backend-email-host-password-IzkFuE",
-        //"arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:ab-backend-plaid-credentials-R1cjDw"
+        for secret, arn in var.secret_arns :
+        "arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:ecs/${var.environment}/${secret}"
       ]
+    }
+  }
+  dynamic "statement" {
+    for_each = toset(var.regions)
+    content {
+        effect  = "Allow"
+        actions = [
+            "kms:Decrypt",
+            "kms:DescribeKey"
+        ]
+        resources = var.secret_kms_ids
     }
   }
 }
@@ -143,14 +157,25 @@ data "aws_iam_policy_document" "ecs_ssm_parameter" {
     content {
         effect  = "Allow"
         actions = [
-        "ssm:GetParameters",
-        "ssm:GetParameter",
-        "ssm:DescribeParameters"
+            "ssm:GetParameters",
+            "ssm:GetParameter",
+            "ssm:DescribeParameters"
         ]
         resources = [
-            "*"
-        //"arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/your-prefix/*"
+            for env_var, arn in var.ssm_env_arns : 
+            "arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/${env_var}"
         ]
+    }
+  }
+  dynamic "statement" {
+    for_each = toset(var.regions)
+    content {
+        effect  = "Allow"
+        actions = [
+            "kms:Decrypt",
+            "kms:DescribeKey"
+        ]
+        resources = var.ssm_kms_ids
     }
   }
 }
@@ -164,6 +189,9 @@ resource "aws_iam_role_policy_attachment" "ecs_ssm_parameter" {
   policy_arn = aws_iam_policy.ecs_ssm_parameter.arn
 } 
 
+
+// do kms here for ecr???
+
 resource "aws_iam_role_policy_attachment" "ecs_ecr_full_access" {
   for_each = toset(local.containers)
   role       = aws_iam_role.ecs_task_execution[each.value].name
@@ -175,6 +203,5 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   role       = aws_iam_role.ecs_task_execution[each.value].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
-
 
 

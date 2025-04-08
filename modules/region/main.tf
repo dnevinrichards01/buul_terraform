@@ -39,7 +39,7 @@ module "ecs" {
   app_security_group_id = module.vpc.sg_app_id
   data_security_group_id = module.vpc.sg_data_id
   ssm_env_arns = module.env_vars.ssm_env_arns
-  secrets_arns = module.env_vars.secrets_arns
+  secrets_arns = module.env_vars.secret_arns
   ecr_repo_names = module.ecr.repo_names 
   ecs_task_role_arns = var.ecs_task_role_arns
   acm_cert_arn = module.acm_cert.acm_cert_arn
@@ -58,7 +58,6 @@ module "acm_cert" {
   validation_record_fqdns = var.validation_record_fqdns
 }
 
-
 module "env_vars" {
   source = "../env_vars"
   providers = {
@@ -70,6 +69,7 @@ module "env_vars" {
   sqs_urls = module.sqs.sqs_urls
   redis_no_cluster_host_port_url = module.cache.redis_no_cluster_host_port_url
   db_username = var.db_username
+  db_password = var.db_password
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   plaid_client_id = var.plaid_client_id
@@ -77,9 +77,9 @@ module "env_vars" {
   email_host_password = var.email_host_password
   email_host_user = var.email_host_user
   fmp_key = var.fmp_key
+  ecs_task_role_arns = var.ecs_task_role_arns
+  vpce_ids = module.vpc.vpce_ids
 }
-
-
 
 module "sqs" {
   source = "../sqs"
@@ -103,7 +103,6 @@ module "cache" {
   data_subnet_ids = module.vpc.data_subnet_ids
   data_security_group_id = module.vpc.sg_data_id
 }
-
 
 
 module "database" {

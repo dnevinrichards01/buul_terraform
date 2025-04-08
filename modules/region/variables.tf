@@ -22,6 +22,11 @@ variable "db_username" {
   type = string
 }
 
+variable "db_password" {
+  type = string
+  sensitive = true
+}
+
 variable "domain" {
   type = string
 }
@@ -64,3 +69,4 @@ variable "hosted_zone_id" {
 variable "validation_record_fqdns" {
   type = list(string)
 }
+

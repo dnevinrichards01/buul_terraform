@@ -10,6 +10,7 @@ module "prod" {
   desired_counts_by_service = var.desired_counts_by_service
   domain = var.domain
   db_username = var.db_username
+  db_password = var.db_password
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   plaid_client_id = var.plaid_client_id

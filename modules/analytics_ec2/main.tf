@@ -17,7 +17,7 @@ resource "aws_instance" "analytics" {
   subnet_id                   = var.app_subnet_id
   vpc_security_group_ids      = [var.analytics_sg_id]
   key_name                    = aws_key_pair.my_key.key_name
-  associate_public_ip_address = true 
+  associate_public_ip_address = false 
 
   tags = {
     Name = "${var.environment}-analytics-ec2"

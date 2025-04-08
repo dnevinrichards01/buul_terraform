@@ -22,6 +22,11 @@ variable "db_username" {
   type = string
 }
 
+variable "db_password" {
+  type = string
+  sensitive = true
+}
+
 variable "plaid_client_id" {
   type = string
   sensitive = true
@@ -55,3 +60,12 @@ variable "fmp_key" {
   type = string
   sensitive = true
 }
+
+variable "vpce_ids" {
+  type = map(string)
+}
+
+variable "ecs_task_role_arns" {
+  type = map(string)
+}
+

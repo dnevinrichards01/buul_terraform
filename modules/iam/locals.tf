@@ -21,5 +21,9 @@ locals {
         for container, role in aws_iam_role.ecs_task_execution : 
         container => role.arn
     }
+    ssm_read_policy_doc_jsons = {
+        for env_var, doc in data.aws_iam_policy_document.ssm_read_policy_doc :
+        env_var => doc.json
+    }
 }
     

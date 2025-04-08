@@ -17,3 +17,23 @@ output "alb_zone_id" {
 output "domain_validation_options" {
     value = module.acm_cert.domain_validation_options
 }
+
+output "vpce_ids" {
+    value = module.vpc.vpce_ids
+}
+
+output "ssm_env_arns" {
+    value = module.env_vars.ssm_env_arns
+}
+
+output "secret_arns" {
+    value = module.env_vars.secret_arns
+}
+
+output "ssm_kms_id" {
+    value = module.env_vars.ssm_kms_id
+}
+
+output "secret_kms_id" {
+    value = module.env_vars.secret_kms_id
+}

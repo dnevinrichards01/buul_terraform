@@ -17,7 +17,7 @@ locals {
   }
 
   db_username_final = "${var.environment}${var.db_username}"
-  db_password_final = data.aws_secretsmanager_random_password.db_password.random_password
+  db_password_final = var.db_password
 
   secrets = {
     DB_CREDENTIALS     = {
@@ -41,5 +41,4 @@ locals {
     for key, secret in local.secrets :
     key => jsonencode(secret)
   }
-  
 }

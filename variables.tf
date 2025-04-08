@@ -19,6 +19,12 @@ variable "db_username" {
 
 //
 
+variable "db_password" {
+  type = string
+  sensitive = true
+  default = "%BZV}^MliKL+8S)Q;u^_l:,M\u003c8aSp=,F"
+}
+
 variable "plaid_secret" {
   type = string
   sensitive = true

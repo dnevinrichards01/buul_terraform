@@ -14,7 +14,6 @@ resource "aws_subnet" "alb" {
 resource "aws_subnet" "app" {
   vpc_id                  = var.vpc_id
   cidr_block              = format("10.0.%d.0/24", tonumber(var.az_index) * 10 + 1)
-  map_public_ip_on_launch = true
   availability_zone       = var.az
 
   tags = {
@@ -33,6 +32,40 @@ resource "aws_subnet" "data" {
 }
 
 
+// app subnet nat gateway set up
+
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${var.environment}-eip-nat"
+  }
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.app.id 
+
+  tags = {
+    Name = "${var.environment}-${var.az}-nat-gateway"
+  }
+}
+
+
+resource "aws_route_table" "app" {
+  vpc_id = var.vpc_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = {
+    Name = "${var.environment}-${var.az}-rt-app"
+  }
+}
+
+
 // route table associations
 
 resource "aws_route_table_association" "rt-public-alb" {
@@ -42,7 +75,7 @@ resource "aws_route_table_association" "rt-public-alb" {
 
 resource "aws_route_table_association" "rt-public-app" {
   subnet_id      = aws_subnet.app.id
-  route_table_id = var.rt_public_id
+  route_table_id = aws_route_table.app.id
 }
 
 resource "aws_route_table_association" "rt-private-data" {

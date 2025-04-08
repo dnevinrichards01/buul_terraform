@@ -27,5 +27,9 @@ output "sg_data_id" {
 }
 
 output "sg_analytics_id" {
-  value = aws_security_group.app.id//aws_security_group.analytics.id
+  value = aws_security_group.analytics.id
+}
+
+output "vpce_ids" {
+  value = local.vpce_ids
 }
