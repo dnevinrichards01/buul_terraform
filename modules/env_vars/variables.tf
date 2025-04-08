@@ -6,10 +6,6 @@ variable "environment" {
     type = string
 }
 
-variable "secret_policy_doc_json" {
-  type = string
-}
-
 variable "sqs_urls" {
   type = map(string)
 }

@@ -2,20 +2,12 @@ variable "environment" {
   type = string
 }
 
-variable "secret_policy_doc_json" {
-  type = string
-}
-
 variable "desired_counts_by_service" {
   type = map(number)
 }
 
 variable "ecs_task_role_arns" {
   type = map(string)
-}
-
-variable "sqs_access_policy_doc_json" { 
-    type = map(string)
 }
 
 variable "db_username" {

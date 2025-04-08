@@ -12,7 +12,7 @@ locals {
     for index, az in var.azs :
     module.subnets_by_az[tostring(index)].data_subnet_id
   ]
-  interface_services = ["kms", "secretsmanager", "ecr.api", "ecr.dkr"]
+  interface_services = ["kms", "secretsmanager", "ecr.api", "ecr.dkr", "sqs"]
   ssm_interface_services = ["ssm", "ssmmessages", "ec2messages"]
   vpce_ids = merge(
     {

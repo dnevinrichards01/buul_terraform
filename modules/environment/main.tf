@@ -9,9 +9,7 @@ module "region_us_west_1" {
   hosted_zone_id = var.hosted_zone_id
   desired_counts_by_service = var.desired_counts_by_service
 
-  secret_policy_doc_json = module.iam.secret_policy_doc_json
   ecs_task_role_arns = module.iam.ecs_task_role_arns
-  sqs_access_policy_doc_json = module.iam.sqs_access_policy_doc_json
   db_username = var.db_username
   db_password = var.db_password
   plaid_secret = var.plaid_secret
@@ -34,9 +32,7 @@ module "region_us_west_2" {
   hosted_zone_id = var.hosted_zone_id
   desired_counts_by_service = var.desired_counts_by_service
 
-  secret_policy_doc_json = module.iam.secret_policy_doc_json
   ecs_task_role_arns = module.iam.ecs_task_role_arns
-  sqs_access_policy_doc_json = module.iam.sqs_access_policy_doc_json
   db_username = var.db_username
   db_password = var.db_password
   plaid_secret = var.plaid_secret

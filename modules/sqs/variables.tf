@@ -8,6 +8,10 @@ variable "region" {
   default = "us-west-1"
 }
 
-variable "sqs_access_policy_doc_json" { 
-    type = map(string)
+variable "ecs_task_role_arns" {
+  type = map(string)
+}
+
+variable "vpce_ids" {
+  type = map(string)
 }

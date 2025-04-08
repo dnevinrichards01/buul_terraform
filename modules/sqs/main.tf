@@ -2,7 +2,7 @@ resource "aws_sqs_queue" "dlq" {
   name                      = "${var.environment}-dlq"
   message_retention_seconds = 1209600 # 14 days
 
-  policy = var.sqs_access_policy_doc_json["dlq"]
+  policy = data.aws_iam_policy_document.sqs_access["dlq"].json
 }
 
 resource "aws_sqs_queue" "user_interaction" {
@@ -20,7 +20,7 @@ resource "aws_sqs_queue" "user_interaction" {
 
   kms_master_key_id = "alias/aws/sqs" # AWS-managed key for SSE
 
-  policy = var.sqs_access_policy_doc_json["user-interaction"]
+  policy = data.aws_iam_policy_document.sqs_access["user-interaction"].json
 }
 
 resource "aws_sqs_queue" "long_running" {
@@ -38,5 +38,33 @@ resource "aws_sqs_queue" "long_running" {
 
   kms_master_key_id = "alias/aws/sqs" # AWS-managed key for SSE
 
-  policy = var.sqs_access_policy_doc_json["long-running"]
+  policy = data.aws_iam_policy_document.sqs_access["long-running"].json
 }
+
+data "aws_iam_policy_document" "sqs_access" {
+  for_each = toset(local.queues)
+  statement {
+    effect  = "Allow"
+    actions = [
+      "SQS:SendMessage",
+      "SQS:ChangeMessageVisibility",
+      "SQS:DeleteMessage",
+      "SQS:ReceiveMessage"
+    ]
+    principals {
+      type = "AWS"
+      identifiers = values(var.ecs_task_role_arns)
+    }
+    resources = [
+      "arn:aws:sqs:${var.region}:${data.aws_caller_identity.current.account_id}:${var.environment}-${each.key}"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [var.vpce_ids["sqs"]]
+    }
+  }
+}
+
+
+data "aws_caller_identity" "current" {}

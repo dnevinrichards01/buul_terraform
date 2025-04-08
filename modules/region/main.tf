@@ -65,7 +65,6 @@ module "env_vars" {
   }
   region = data.aws_region.region.name
   environment = var.environment
-  secret_policy_doc_json = var.secret_policy_doc_json
   sqs_urls = module.sqs.sqs_urls
   redis_no_cluster_host_port_url = module.cache.redis_no_cluster_host_port_url
   db_username = var.db_username
@@ -88,7 +87,8 @@ module "sqs" {
   }
   region = data.aws_region.region.name
   environment = var.environment
-  sqs_access_policy_doc_json = var.sqs_access_policy_doc_json
+  ecs_task_role_arns = var.ecs_task_role_arns
+  vpce_ids = module.vpc.vpce_ids
 }
 
 

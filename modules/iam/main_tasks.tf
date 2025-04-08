@@ -52,17 +52,38 @@ data "aws_iam_policy_document" "ecs_exec" {
     content {
         effect  = "Allow"
         actions = [
-        "ecs:ExecuteCommand",
-        "ssm:StartSession",
-        "ssm:DescribeSessions",
-        "ssmmessages:CreateControlChannel",
-        "ssmmessages:CreateDataChannel",
-        "ssmmessages:OpenControlChannel",
-        "ssmmessages:OpenDataChannel"
+            "ssm:StartSession",
+            "ssm:DescribeSessions",
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
         ]
-        resources = ["*"] // specify later
+        resources = ["*"]
+        condition {
+            test     = "StringEquals"
+            variable = "aws:sourceVpce"
+            values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
+        }
     }
   }
+  dynamic "statement" {
+    for_each = toset(var.regions)
+    content {
+        effect  = "Allow"
+        actions = [
+            "ecs:ExecuteCommand"
+        ]
+        resources = ["arn:aws:ecs:${statement.value}:${data.aws_caller_identity.current.account_id}:task-definition/${var.environment}-${each.value}:*"]
+        condition {
+            test     = "StringEquals"
+            variable = "aws:sourceVpce"
+            values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
+        }
+    }
+  }
+
+  
 }
 resource "aws_iam_policy" "ecs_exec" {
   for_each = toset(local.containers)
@@ -90,21 +111,19 @@ data "aws_iam_policy_document" "ecs_sqs" {
         "sqs:GetQueueAttributes"
       ]
       resources = [
-        "*"
-        //"arn:aws:sqs:${statement.value}:${data.aws_caller_identity.current.account_id}:ab-user-interaction",
-        //"arn:aws:sqs:${statement.value}:${data.aws_caller_identity.current.account_id}:ab-long-running",
-        //"arn:aws:sqs:${statement.value}:${data.aws_caller_identity.current.account_id}:ab-dlq"
+        for queue in local.queues :
+        "arn:aws:sqs:${statement.value}:${data.aws_caller_identity.current.account_id}:${var.environment}-${queue}"
       ]
     }
   }
-  statement {
-    effect  = "Allow"
-    actions = [
-      "sqs:ListQueues",
-      "sqs:CreateQueue"
-    ]
-    resources = ["*"]
-  }
+  //statement {
+  //  effect  = "Allow"
+  //  actions = [
+  //    "sqs:ListQueues",
+  //    "sqs:CreateQueue"
+  //  ]
+  //  resources = ["*"]
+  //}
 }
 resource "aws_iam_policy" "ecs_sqs" {
   name   = "${var.environment}-ecs-sqs"
