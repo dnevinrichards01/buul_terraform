@@ -2,8 +2,10 @@
 
 resource "aws_subnet" "alb" {
   vpc_id                  = var.vpc_id
-  cidr_block              = format("10.0.%d.0/24", tonumber(var.az_index) * 10 + 0)
+  cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10)
+  ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10)
   map_public_ip_on_launch = true
+  assign_ipv6_address_on_creation = true
   availability_zone       = var.az
 
   tags = {
@@ -13,7 +15,9 @@ resource "aws_subnet" "alb" {
 
 resource "aws_subnet" "app" {
   vpc_id                  = var.vpc_id
-  cidr_block              = format("10.0.%d.0/24", tonumber(var.az_index) * 10 + 1)
+  cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
+  ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
+  assign_ipv6_address_on_creation = true
   availability_zone       = var.az
 
   tags = {
@@ -23,7 +27,9 @@ resource "aws_subnet" "app" {
 
 resource "aws_subnet" "data" {
   vpc_id            = var.vpc_id
-  cidr_block        = format("10.0.%d.0/24", tonumber(var.az_index) * 10 + 3)
+  cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
+  ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
+  assign_ipv6_address_on_creation = true
   availability_zone = var.az
 
   tags = {

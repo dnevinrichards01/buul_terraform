@@ -1,4 +1,14 @@
 locals {
+  kms = {
+    RH_ACCESS_KMS_ALIAS = "rh-access", 
+    RH_REFRESH_KMS_ALIAS = "rh-refresh", // refresh and device_id
+    PLAID_ITEM_KMS_ALIAS = "plaid-item-access", 
+    PLAID_USER_KMS_ALIAS = "plaid-user-access", //userToken
+    USER_PII_KMS_ALIAS = "user-pii", // email, number, waitlist email, name, username
+  } // sort on the encrypted version of email and number...
+  
+  // 
+    
   services = ["app", "celery", "beat"]
   tasks = ["app", "celery", "beat", "debug"]
   ecr_repo_names = {

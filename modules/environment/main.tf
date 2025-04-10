@@ -19,6 +19,11 @@ module "region_us_west_1" {
   email_host_user = var.email_host_user
   plaid_client_id = var.plaid_client_id
   validation_record_fqdns = var.validation_record_fqdns
+
+  analytics_ec2_role_arn = module.iam.analytics_ec2_role_arn
+  analytics_db_user_password = var.analytics_db_user_password
+  analytics_db_user_username = var.analytics_db_user_username
+  analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
 }
 
 module "region_us_west_2" {
@@ -42,6 +47,11 @@ module "region_us_west_2" {
   email_host_user = var.email_host_user
   plaid_client_id = var.plaid_client_id
   validation_record_fqdns = var.validation_record_fqdns
+
+  analytics_ec2_role_arn = module.iam.analytics_ec2_role_arn
+  analytics_db_user_password = var.analytics_db_user_password
+  analytics_db_user_username = var.analytics_db_user_username
+  analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
 }
 
 module "latency_routing" {
@@ -67,14 +77,23 @@ module "codebuild" {
   role_arn =  module.iam.codebuild_role_arn
 }
 
-module "analytics_ec2" {
-  source = "../analytics_ec2"
+
+module "analytics" {
+  source = "../analytics"
   providers = {
     aws = aws.us_west_1
   }
   environment = var.environment
-  analytics_sg_id = module.region_us_west_1[0].analytics_sg_id
   app_subnet_id = module.region_us_west_1[0].app_subnet_ids[0]
+  data_subnet_ids = module.region_us_west_1[0].data_subnet_ids
+  analytics_db_master_password = var.analytics_db_master_password
+  analytics_db_master_username = var.analytics_db_master_username
+  analytics_db_user_password = var.analytics_db_user_password
+  analytics_db_user_username = var.analytics_db_user_username
+  sg_analytics_id = module.region_us_west_1[0].sg_analytics_id
+  sg_analyticsdb_id = module.region_us_west_1[0].sg_analyticsdb_id
+  db_name_port_host = module.region_us_west_1[0].db_name_port_host
+  ec2_analytics_role_name = module.iam.ec2_analytics_role_name
 }
 
 
@@ -88,4 +107,8 @@ module "iam" {
   secret_arns = module.region_us_west_1[0].secret_arns
   secret_kms_ids = local.secret_kms_ids
   ssm_kms_ids = local.ssm_kms_ids
+  analytics_ssm_env_arns = module.region_us_west_1[0].analytics_ssm_env_arns
+  analytics_secret_arns = module.region_us_west_1[0].analytics_secret_arns
+  analytics_secret_kms_id = module.region_us_west_1[0].analytics_secret_kms_id
+  analytics_ssm_kms_id = module.region_us_west_1[0].analytics_ssm_kms_id
 }

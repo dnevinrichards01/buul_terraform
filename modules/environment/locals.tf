@@ -8,7 +8,7 @@ locals {
     us-west-2 = contains(var.regions, "us-west-2") ? module.region_us_west_2[0].alb_zone_id : null,
   }
   interface_services = [
-    "kms", "secretsmanager", "ecr.api", "ecr.dkr", "ssm", 
+    "kms", "secretsmanager", "ssm", //"ecr.api", "ecr.dkr"
     "ssmmessages", "ec2messages"
   ]
   vpce_ids = {

@@ -62,6 +62,21 @@ resource "aws_ecs_task_definition" "tasks" {
 }
 
 
+// kms
+
+resource "aws_kms_key" "db_encryption" {
+  for_each = local.kms
+  description             = "encrypts ${each.value}"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
+}
+resource "aws_kms_alias" "db_encryption" {
+  for_each = local.kms
+  name          = "alias/${var.environment}-${each.value}"
+  target_key_id = aws_kms_key.db_encryption[each.key].key_id
+}
+
+
 // alb 
 
 resource "aws_lb" "app" {

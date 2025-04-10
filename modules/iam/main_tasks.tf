@@ -82,8 +82,6 @@ data "aws_iam_policy_document" "ecs_exec" {
         }
     }
   }
-
-  
 }
 resource "aws_iam_policy" "ecs_exec" {
   for_each = toset(local.containers)
@@ -182,7 +180,7 @@ data "aws_iam_policy_document" "ecs_ssm_parameter" {
         ]
         resources = [
             for env_var, arn in var.ssm_env_arns : 
-            "arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/${env_var}"
+            "arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/ecs/${var.environment}/${env_var}"
         ]
     }
   }

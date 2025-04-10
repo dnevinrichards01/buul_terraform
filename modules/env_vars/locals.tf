@@ -1,5 +1,5 @@
 locals {
-  env_vars = {
+  django_env_vars = {
     DB_PORT                  = var.db_name_port_host["port"]
     DB_NAME                  = var.db_name_port_host["name"]
     DB_HOST                  = var.db_name_port_host["host"]
@@ -15,10 +15,9 @@ locals {
     REDIS_PORT               = var.redis_no_cluster_host_port_url["port"]
     REDIS_CAFILE_PATH        = "/code/conf_files/redis-bundle.pem"
   }
-
+  env_vars = merge(local.django_env_vars, var.kms_aliases)
   db_username_final = "${var.environment}${var.db_username}"
   db_password_final = var.db_password
-
   secrets = {
     DB_CREDENTIALS     = {
         username = local.db_username_final,
@@ -36,9 +35,27 @@ locals {
 
     FMP_CREDENTIALS = { FMP_KEY = var.fmp_key }
   }
-  
   secret_jsons = {
     for key, secret in local.secrets :
     key => jsonencode(secret)
   }
+
+  analytics_ec2_env_vars = {
+    DB_PORT                  = var.analytics_db_name_port_host["port"]
+    DB_NAME                  = var.analytics_db_name_port_host["name"]
+    DB_HOST                  = var.analytics_db_name_port_host["host"]
+    DB_CAFILE_PATH           = "/code/conf_files/rds-us-west-1-bundle.pem"
+  }
+  analytics_ec2_secrets = {
+    DB_CREDENTIALS     = {
+        username = var.analytics_db_user_username,
+        password = var.analytics_db_user_password
+    }
+  }
+  analytics_ec2_secret_jsons = {
+    for key, secret in local.analytics_ec2_secrets :
+    key => jsonencode(secret)
+  }
+  
+  
 }

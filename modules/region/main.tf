@@ -19,6 +19,7 @@ module "ecr" {
   }
   region = data.aws_region.region.name
   environment = var.environment
+  ecs_task_role_arns = var.ecs_task_role_arns
 }
 
 
@@ -78,7 +79,13 @@ module "env_vars" {
   fmp_key = var.fmp_key
   ecs_task_role_arns = var.ecs_task_role_arns
   vpce_ids = module.vpc.vpce_ids
+  kms_aliases = module.ecs.kms_aliases
+  analytics_db_user_password = var.analytics_db_user_password
+  analytics_db_user_username = var.analytics_db_user_username
+  analytics_db_name_port_host = var.analytics_db_name_port_host
+  analytics_ec2_role_arn = var.analytics_ec2_role_arn
 }
+
 
 module "sqs" {
   source = "../sqs"

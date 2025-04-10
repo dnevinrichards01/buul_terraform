@@ -2,6 +2,7 @@
 
 resource "aws_vpc" "vpc" {
   cidr_block           = "10.0.0.0/16"
+  assign_generated_ipv6_cidr_block  = true 
   enable_dns_hostnames = true
   enable_dns_support = true
 
@@ -58,6 +59,8 @@ module "subnets_by_az" {
   rt_public_id  = aws_route_table.public.id
   rt_private_id = aws_route_table.private.id
   igw_id = aws_internet_gateway.igw.id
+  vpc_ipv6_cidr_block = aws_vpc.vpc.ipv6_cidr_block
+  vpc_cidr_block = aws_vpc.vpc.cidr_block
 }
 
 

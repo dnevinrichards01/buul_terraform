@@ -17,12 +17,34 @@ variable "db_username" {
   default = "db"
 }
 
+variable "analytics_db_master_username" {
+  type = string
+  default = "analyticsdb"
+}
+
+variable "analytics_db_user_username" {
+  type = string
+  default = "analyticsuser"
+}
+
 //
 
 variable "db_password" {
   type = string
   sensitive = true
-  default = "%BZV}^MliKL+8S)Q;u^_l:,M\u003c8aSp=,F"
+  default = "_BZV}^MliKL-8S)Q:u^_l:,M\u003c8aSp=,F"
+}
+
+variable "analytics_db_master_password" {
+  type = string
+  sensitive = true
+  default = "_BZV}^MliKL-9T)R:v^_m:,Nv114d9bTq=,G"
+}
+
+variable "analytics_db_user_password" {
+  type = string
+  sensitive = true
+  default = "_BZV}^abCDc-9T)R:v^_m:,Nv114d9bTq=,G"
 }
 
 variable "plaid_secret" {

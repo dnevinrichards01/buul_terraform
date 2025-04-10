@@ -60,3 +60,21 @@ variable "hosted_zone_id" {
 variable "validation_record_fqdns" {
   type = list(string)
 }
+
+variable "analytics_db_user_username" {
+  type = string
+}
+
+variable "analytics_db_user_password" {
+  type = string
+  sensitive = true
+}
+
+variable "analytics_db_master_username" {
+  type = string
+}
+
+variable "analytics_db_master_password" {
+  type = string
+  sensitive = true
+}

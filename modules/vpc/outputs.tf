@@ -30,6 +30,10 @@ output "sg_analytics_id" {
   value = aws_security_group.analytics.id
 }
 
+output "sg_analyticsdb_id" {
+  value = aws_security_group.analyticsdb.id
+}
+
 output "vpce_ids" {
   value = local.vpce_ids
 }

@@ -19,6 +19,10 @@ module "prod" {
   fmp_key = var.fmp_key
   hosted_zone_id = module.domain_records.hosted_zone_id
   validation_record_fqdns = module.domain_records.validation_record_fqdns
+  analytics_db_master_password = var.analytics_db_master_password
+  analytics_db_master_username = var.analytics_db_master_username
+  analytics_db_user_password = var.analytics_db_user_password
+  analytics_db_user_username = var.analytics_db_user_username
 }
 
 module "domain_records" {

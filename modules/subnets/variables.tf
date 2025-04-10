@@ -10,6 +10,14 @@ variable "vpc_id" {
   type = string
 }
 
+variable "vpc_ipv6_cidr_block" {
+  type = string
+}
+
+variable "vpc_cidr_block" {
+  type = string
+}
+
 variable "igw_id" { // creates a dependency in place of using depends_on in nat gateway
   type = string
 }
