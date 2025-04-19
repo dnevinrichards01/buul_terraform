@@ -19,7 +19,7 @@ resource "aws_ecs_service" "services" {
   network_configuration {
     subnets         = var.app_subnet_ids
     security_groups = [var.app_security_group_id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   dynamic "load_balancer" {
@@ -51,8 +51,8 @@ resource "aws_ecs_task_definition" "tasks" {
   cpu                      = "1024"
   memory                   = "3072"
   network_mode             = "awsvpc"
-  execution_role_arn       = each.value == "debug" ? var.ecs_task_role_arns["app"] : var.ecs_task_role_arns[each.value]
-  task_role_arn            = each.value == "debug" ? var.ecs_task_role_arns["app"] : var.ecs_task_role_arns[each.value]
+  execution_role_arn       = each.value == "debug-current" || each.value == "debug-latest" ? var.ecs_task_role_arns["app"] : var.ecs_task_role_arns[each.value]
+  task_role_arn            = each.value == "debug-current" || each.value == "debug-latest" ? var.ecs_task_role_arns["app"] : var.ecs_task_role_arns[each.value]
   runtime_platform {
     cpu_architecture        = "X86_64"
     operating_system_family = "LINUX"
@@ -75,6 +75,45 @@ resource "aws_kms_alias" "db_encryption" {
   name          = "alias/${var.environment}-${each.value}"
   target_key_id = aws_kms_key.db_encryption[each.key].key_id
 }
+data "aws_iam_policy_document" "db_encryption" {
+  for_each = local.kms
+  statement {
+    effect  = "Allow"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey*"
+    ]
+    resources = [aws_kms_key.db_encryption[each.key].arn]
+    principals {
+      type        = "AWS"
+      identifiers = values(var.ecs_task_role_arns)
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [var.vpce_ids["kms"]]
+    }
+  }
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+
+    actions = ["kms:*"]
+    resources = ["*"]
+}
+}
+resource "aws_kms_key_policy" "db_encryption" {
+  for_each = local.kms
+  key_id = aws_kms_key.db_encryption[each.key].key_id
+  policy = data.aws_iam_policy_document.db_encryption[each.key].json
+}
+
 
 
 // alb 

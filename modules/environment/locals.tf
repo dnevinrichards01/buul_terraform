@@ -26,4 +26,8 @@ locals {
     contains(var.regions, "us-west-1") ? module.region_us_west_1[0].secret_kms_id : null,
     contains(var.regions, "us-west-2") ? module.region_us_west_2[0].secret_kms_id : null,
   ])
+  ecs_kms_arns = compact(flatten([
+    contains(var.regions, "us-west-1") ? module.region_us_west_1[0].ecs_kms_arns : null,
+    contains(var.regions, "us-west-2") ? module.region_us_west_2[0].ecs_kms_arns : null,
+  ]))
 }

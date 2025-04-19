@@ -15,8 +15,11 @@ module "region_us_west_1" {
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
+  anonymize_user_hmac_key = var.anonymize_user_hmac_key
   email_host_password = var.email_host_password
   email_host_user = var.email_host_user
+  notifications_email = var.notifications_email
+  sendgrid_api_key = var.sendgrid_api_key
   plaid_client_id = var.plaid_client_id
   validation_record_fqdns = var.validation_record_fqdns
 
@@ -43,8 +46,11 @@ module "region_us_west_2" {
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
+  anonymize_user_hmac_key = var.anonymize_user_hmac_key
   email_host_password = var.email_host_password
   email_host_user = var.email_host_user
+  notifications_email = var.notifications_email
+  sendgrid_api_key = var.sendgrid_api_key
   plaid_client_id = var.plaid_client_id
   validation_record_fqdns = var.validation_record_fqdns
 
@@ -111,4 +117,5 @@ module "iam" {
   analytics_secret_arns = module.region_us_west_1[0].analytics_secret_arns
   analytics_secret_kms_id = module.region_us_west_1[0].analytics_secret_kms_id
   analytics_ssm_kms_id = module.region_us_west_1[0].analytics_ssm_kms_id
+  ecs_kms_arns = local.ecs_kms_arns
 }

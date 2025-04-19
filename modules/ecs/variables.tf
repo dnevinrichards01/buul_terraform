@@ -59,3 +59,7 @@ variable "ecs_task_role_arns" {
 variable "acm_cert_arn" {
   type = string
 }
+
+variable "vpce_ids" {
+  type = map(string)
+}

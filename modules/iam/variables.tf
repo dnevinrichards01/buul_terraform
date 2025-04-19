@@ -46,5 +46,6 @@ variable "analytics_ssm_kms_id" {
   type = string
 }
 
-
-
+variable "ecs_kms_arns" {
+  type = list(string)
+}

@@ -14,13 +14,18 @@ resource "aws_ecr_repository" "repos" {
     Image = each.value
   }
 } 
+resource "aws_ecr_repository_policy" "resource_policy" {
+  for_each      = toset(local.repos)
+  repository = aws_ecr_repository.repos[each.value].name
+  policy     = data.aws_iam_policy_document.resource_policy[each.value].json
+}
 data "aws_iam_policy_document" "resource_policy" {
   for_each      = toset(local.repos)
   statement {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = values(var.ecs_task_role_arns)
+      identifiers = [var.ecs_task_role_arns[each.value]]
     }
     actions = [
       "ecr:GetAuthorizationToken",
@@ -33,7 +38,8 @@ data "aws_iam_policy_document" "resource_policy" {
     //  variable = "aws:sourceVpce"
     //  values   = [var.vpce_ids["ecr_api"], var.vpce_ids["ecr_dkr"]]
     //}
-    resources = ["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository:${var.environment}-${each.key}"]
+    //resources = [aws_ecr_repository.repos[each.value].arn]
+    //["arn:aws:ecr:${var.region}:${data.aws_caller_identity.current.account_id}:repository:${var.environment}-${each.key}"]
   }
 }
 

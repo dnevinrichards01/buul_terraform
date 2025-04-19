@@ -20,8 +20,8 @@ data "aws_iam_policy_document" "analytics_ec2_read_secrets" {
       effect  = "Allow"
       actions = ["secretsmanager:GetSecretValue"]
       resources = [
-        for secret, arn in var.analytics_secret_arns :
-        "arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:analytics/${var.environment}/${secret}"
+        for secret, arn in var.analytics_secret_arns : arn
+        //"arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:analytics/${var.environment}/${secret}"
       ]
     }
   }
@@ -57,8 +57,8 @@ data "aws_iam_policy_document" "analytics_ec2_ssm_parameter" {
             "ssm:DescribeParameters"
         ]
         resources = [
-            for env_var, arn in var.analytics_ssm_env_arns : 
-            "arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/analytics/${var.environment}/${env_var}"
+            for env_var, arn in var.analytics_ssm_env_arns : arn
+            //"arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/analytics/${var.environment}/${env_var}"
         ]
     }
   }
@@ -84,33 +84,9 @@ resource "aws_iam_role_policy_attachment" "analytics_ec2_ssm_parameter" {
 } 
 
 // kms here too
-data "aws_iam_policy_document" "analytics_ec2_ssm_session" {
-  dynamic "statement" {
-    for_each = toset(var.regions)
-    content {
-        effect  = "Allow"
-        actions = [
-            "ssm:StartSession",
-            "ssm:DescribeSessions",
-            "ssmmessages:CreateControlChannel",
-            "ssmmessages:CreateDataChannel",
-            "ssmmessages:OpenControlChannel",
-            "ssmmessages:OpenDataChannel"
-        ]
-        resources = ["*"]
-        condition {
-            test     = "StringEquals"
-            variable = "aws:sourceVpce"
-            values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
-        }
-    }
-  }
-}
-resource "aws_iam_policy" "analytics_ec2_ssm_session" {
-  name   = "${var.environment}-analytics-ec2-ssm-session"
-  policy = data.aws_iam_policy_document.analytics_ec2_ssm_session.json
-}
+
 resource "aws_iam_role_policy_attachment" "analytics_ec2_ssm_session" {
   role       = aws_iam_role.analytics_ec2.name
-  policy_arn = aws_iam_policy.analytics_ec2_ssm_session.arn
-} 
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+

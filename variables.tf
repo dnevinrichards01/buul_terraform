@@ -87,5 +87,21 @@ variable "regions" {
   type = list(string)
   default = ["us-west-1"]
 }
-//
 
+variable "anonymize_user_hmac_key" {
+  type = string
+  sensitive = true
+  default = "QcNqeUlvNTv3Q3xAWtFqZyduN5n6"
+}
+
+variable "notifications_email" {
+  type = string
+  sensitive = true
+  default = "notifications@bu-ul.com"
+}
+
+variable "sendgrid_api_key" {
+  type = string
+  sensitive = true
+  default = "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"
+}

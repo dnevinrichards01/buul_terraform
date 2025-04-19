@@ -24,6 +24,7 @@ resource "aws_route_table" "public" {
 
   route {
     cidr_block = "0.0.0.0/0"
+    ipv6_cidr_block = "::/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
@@ -81,6 +82,7 @@ resource "aws_security_group_rule" "alb_accepts_internet" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
   security_group_id = aws_security_group.alb.id
 }
 resource "aws_security_group_rule" "alb_to_app" {
@@ -120,6 +122,7 @@ resource "aws_security_group_rule" "app_to_internet" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
   security_group_id = aws_security_group.app.id
 }
 resource "aws_security_group_rule" "app_to_smtp" {
@@ -129,6 +132,7 @@ resource "aws_security_group_rule" "app_to_smtp" {
   to_port           = 587
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
   security_group_id = aws_security_group.app.id
 }
 resource "aws_security_group_rule" "app_to_redis" {
@@ -149,7 +153,6 @@ resource "aws_security_group_rule" "app_to_postgres" {
   source_security_group_id = aws_security_group.data.id
   security_group_id        = aws_security_group.app.id
 }
-
 
 // security group data
 
@@ -218,6 +221,7 @@ resource "aws_security_group_rule" "analytics_to_internet_https" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
   security_group_id = aws_security_group.analytics.id
 }
 resource "aws_security_group_rule" "analytics_to_internet_http" {
@@ -227,6 +231,7 @@ resource "aws_security_group_rule" "analytics_to_internet_http" {
   to_port           = 80
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
   security_group_id = aws_security_group.analytics.id
 }
 resource "aws_security_group_rule" "analytics_to_ssm" {
@@ -247,7 +252,6 @@ resource "aws_security_group_rule" "analytics_to_analyticsdb" {
   source_security_group_id = aws_security_group.analyticsdb.id
   security_group_id        = aws_security_group.analytics.id
 }
-
 
 // security group VPCE
 

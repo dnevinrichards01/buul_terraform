@@ -69,3 +69,7 @@ output "analytics_secret_kms_id" {
 output "analytics_ssm_kms_id" {
     value = data.aws_region.region.name == "us-west-1" ? module.env_vars.analytics_ssm_kms_id : null
 }
+
+output "ecs_kms_arns" {
+    value = module.ecs.kms_arns
+}

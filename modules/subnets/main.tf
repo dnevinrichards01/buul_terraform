@@ -17,6 +17,7 @@ resource "aws_subnet" "app" {
   vpc_id                  = var.vpc_id
   cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
   ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
+  map_public_ip_on_launch = false
   assign_ipv6_address_on_creation = true
   availability_zone       = var.az
 
@@ -29,6 +30,7 @@ resource "aws_subnet" "data" {
   vpc_id            = var.vpc_id
   cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
   ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
+  map_public_ip_on_launch = false
   assign_ipv6_address_on_creation = true
   availability_zone = var.az
 
@@ -50,7 +52,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.app.id 
+  subnet_id     = aws_subnet.alb.id 
 
   tags = {
     Name = "${var.environment}-${var.az}-nat-gateway"
@@ -63,6 +65,7 @@ resource "aws_route_table" "app" {
 
   route {
     cidr_block = "0.0.0.0/0"
+    ipv6_cidr_block = "::/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
 

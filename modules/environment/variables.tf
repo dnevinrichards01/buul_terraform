@@ -78,3 +78,18 @@ variable "analytics_db_master_password" {
   type = string
   sensitive = true
 }
+
+variable "anonymize_user_hmac_key" {
+  type = string
+  sensitive = true
+}
+
+variable "notifications_email" {
+  type = string
+  sensitive = true
+}
+
+variable "sendgrid_api_key" {
+  type = string
+  sensitive = true
+}

@@ -44,6 +44,7 @@ module "ecs" {
   ecr_repo_names = module.ecr.repo_names 
   ecs_task_role_arns = var.ecs_task_role_arns
   acm_cert_arn = module.acm_cert.acm_cert_arn
+  vpce_ids = module.vpc.vpce_ids
 }
 
 
@@ -76,6 +77,8 @@ module "env_vars" {
   db_name_port_host = module.database.db_name_port_host
   email_host_password = var.email_host_password
   email_host_user = var.email_host_user
+  notifications_email = var.notifications_email
+  sendgrid_api_key = var.sendgrid_api_key
   fmp_key = var.fmp_key
   ecs_task_role_arns = var.ecs_task_role_arns
   vpce_ids = module.vpc.vpce_ids
@@ -84,6 +87,8 @@ module "env_vars" {
   analytics_db_user_username = var.analytics_db_user_username
   analytics_db_name_port_host = var.analytics_db_name_port_host
   analytics_ec2_role_arn = var.analytics_ec2_role_arn
+  anonymize_user_hmac_key = var.anonymize_user_hmac_key
+  domain = var.domain
 }
 
 
