@@ -9,6 +9,10 @@ output "alb_zone_id" {
 output "kms_aliases" {
   value = {
     for env_var_name, alias in local.kms :
-    env_var_name => "${var.environment}-${alias}"
+    env_var_name => "alias/${var.environment}-${alias}"
   }
+}
+
+output "kms_arns" {
+  value = [for kms_env_var_name, kms in aws_kms_key.db_encryption : kms.arn]
 }

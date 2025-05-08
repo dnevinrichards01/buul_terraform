@@ -1,5 +1,5 @@
 resource "aws_acm_certificate" "alb" {
-  domain_name       = "${var.environment}-${var.region}.${var.domain}"
+  domain_name       = "${var.environment}.${var.domain}"
   validation_method = "DNS"
 
   lifecycle {

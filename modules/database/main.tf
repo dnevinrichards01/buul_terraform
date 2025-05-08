@@ -13,10 +13,11 @@ resource "aws_db_instance" "postgres" {
   password                = var.db_password_final
   port                    = 5432
   publicly_accessible     = false
-  skip_final_snapshot     = true
   deletion_protection     = false//true
   vpc_security_group_ids  = [var.data_security_group_id]
   db_subnet_group_name    = aws_db_subnet_group.postgres.name
+  backup_retention_period = 7
+  backup_window            = "06:00-07:00"
 
   //lifecycle {
   //  prevent_destroy = true

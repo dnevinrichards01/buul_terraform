@@ -18,6 +18,12 @@ resource "aws_instance" "analytics" {
   associate_public_ip_address = false 
   iam_instance_profile = aws_iam_instance_profile.ec2_analytics.name
 
+  metadata_options {
+    http_endpoint               = "enabled"   # enable metadata service
+    http_tokens                 = "required"  # require IMDSv2
+    http_put_response_hop_limit = 2           # optional: controls response forwarding
+  }
+
   tags = {
     Name = "${var.environment}-analytics-ec2"
   }
@@ -47,6 +53,8 @@ resource "aws_db_instance" "analytics" {
   deletion_protection     = false//true
   vpc_security_group_ids  = [var.sg_analyticsdb_id]
   db_subnet_group_name    = aws_db_subnet_group.analytics.name
+  backup_retention_period = 7
+  backup_window            = "06:00-07:00"
 
   //sg?
 
@@ -121,8 +129,8 @@ resource "aws_dms_endpoint" "target" { // create the db here
   password                = var.analytics_db_master_password
 }
 resource "aws_dms_replication_task" "example" {
-  replication_task_id          = "move-two-tables"
-  migration_type               = "full-load"
+  replication_task_id          = "${var.environment}-main-to-analytics-db"
+  migration_type               = "cdc"
   replication_instance_arn     = aws_dms_replication_instance.analytics.replication_instance_arn
   source_endpoint_arn          = aws_dms_endpoint.source.endpoint_arn
   target_endpoint_arn          = aws_dms_endpoint.target.endpoint_arn
@@ -136,7 +144,7 @@ resource "aws_dms_replication_task" "example" {
         "rule-name"    = "1"
         "object-locator" = {
           "schema-name" = "public"
-          "table-name"  = "api_log"
+          "table-name"  = "api_loganon"
         }
         "rule-action" = "include"
       },
@@ -146,7 +154,7 @@ resource "aws_dms_replication_task" "example" {
         "rule-name"    = "2"
         "object-locator" = {
           "schema-name" = "public"
-          "table-name"  = "rh_log"
+          "table-name"  = "rh_loganon"
         }
         "rule-action" = "include"
       },
@@ -156,7 +164,7 @@ resource "aws_dms_replication_task" "example" {
         "rule-name"    = "3"
         "object-locator" = {
           "schema-name" = "public"
-          "table-name"  = "api_invest"
+          "table-name"  = "api_loganoninvestments"
         }
         "rule-action" = "include"
       }

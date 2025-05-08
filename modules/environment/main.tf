@@ -15,44 +15,50 @@ module "region_us_west_1" {
   plaid_secret = var.plaid_secret
   plaid_host = var.plaid_host
   fmp_key = var.fmp_key
+  anonymize_user_hmac_key = var.anonymize_user_hmac_key
   email_host_password = var.email_host_password
   email_host_user = var.email_host_user
+  notifications_email = var.notifications_email
+  sendgrid_api_key = var.sendgrid_api_key
   plaid_client_id = var.plaid_client_id
   validation_record_fqdns = var.validation_record_fqdns
 
-  analytics_ec2_role_arn = module.iam.analytics_ec2_role_arn
-  analytics_db_user_password = var.analytics_db_user_password
-  analytics_db_user_username = var.analytics_db_user_username
-  analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
+//  analytics_ec2_role_arn = module.iam.analytics_ec2_role_arn
+//  analytics_db_user_password = var.analytics_db_user_password
+//  analytics_db_user_username = var.analytics_db_user_username
+//  analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
 }
 
-module "region_us_west_2" {
-  source = "../region"
-  count = contains(var.regions, "us-west-2") ? 1 : 0
-  providers = {
-    aws = aws.us_west_2
-  }
-  environment = var.environment
-  domain = var.domain
-  hosted_zone_id = var.hosted_zone_id
-  desired_counts_by_service = var.desired_counts_by_service
+//module "region_us_west_2" {
+//  source = "../region"
+//  count = contains(var.regions, "us-west-2") ? 1 : 0
+//  providers = {
+//    aws = aws.us_west_2
+//  }
+//  environment = var.environment
+//  domain = var.domain
+//  hosted_zone_id = var.hosted_zone_id
+//  desired_counts_by_service = var.desired_counts_by_service
+//
+//  ecs_task_role_arns = module.iam.ecs_task_role_arns
+//  db_username = var.db_username
+//  db_password = var.db_password
+//  plaid_secret = var.plaid_secret
+//  plaid_host = var.plaid_host
+//  fmp_key = var.fmp_key
+//  anonymize_user_hmac_key = var.anonymize_user_hmac_key
+//  email_host_password = var.email_host_password
+//  email_host_user = var.email_host_user
+//  notifications_email = var.notifications_email
+//  sendgrid_api_key = var.sendgrid_api_key
+//  plaid_client_id = var.plaid_client_id
+//  validation_record_fqdns = var.validation_record_fqdns
 
-  ecs_task_role_arns = module.iam.ecs_task_role_arns
-  db_username = var.db_username
-  db_password = var.db_password
-  plaid_secret = var.plaid_secret
-  plaid_host = var.plaid_host
-  fmp_key = var.fmp_key
-  email_host_password = var.email_host_password
-  email_host_user = var.email_host_user
-  plaid_client_id = var.plaid_client_id
-  validation_record_fqdns = var.validation_record_fqdns
-
-  analytics_ec2_role_arn = module.iam.analytics_ec2_role_arn
-  analytics_db_user_password = var.analytics_db_user_password
-  analytics_db_user_username = var.analytics_db_user_username
-  analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
-}
+//  analytics_ec2_role_arn = module.iam.analytics_ec2_role_arn
+//  analytics_db_user_password = var.analytics_db_user_password
+//  analytics_db_user_username = var.analytics_db_user_username
+//  analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
+//}
 
 module "latency_routing" {
   source = "../latency_routing"
@@ -78,23 +84,23 @@ module "codebuild" {
 }
 
 
-module "analytics" {
-  source = "../analytics"
-  providers = {
-    aws = aws.us_west_1
-  }
-  environment = var.environment
-  app_subnet_id = module.region_us_west_1[0].app_subnet_ids[0]
-  data_subnet_ids = module.region_us_west_1[0].data_subnet_ids
-  analytics_db_master_password = var.analytics_db_master_password
-  analytics_db_master_username = var.analytics_db_master_username
-  analytics_db_user_password = var.analytics_db_user_password
-  analytics_db_user_username = var.analytics_db_user_username
-  sg_analytics_id = module.region_us_west_1[0].sg_analytics_id
-  sg_analyticsdb_id = module.region_us_west_1[0].sg_analyticsdb_id
-  db_name_port_host = module.region_us_west_1[0].db_name_port_host
-  ec2_analytics_role_name = module.iam.ec2_analytics_role_name
-}
+//module "analytics" {
+//  source = "../analytics"
+//  providers = {
+//    aws = aws.us_west_1
+//  }
+//  environment = var.environment
+//  app_subnet_id = module.region_us_west_1[0].app_subnet_ids[0]
+//  data_subnet_ids = module.region_us_west_1[0].data_subnet_ids
+//  analytics_db_master_password = var.analytics_db_master_password
+//  analytics_db_master_username = var.analytics_db_master_username
+//  analytics_db_user_password = var.analytics_db_user_password
+//  analytics_db_user_username = var.analytics_db_user_username
+//  sg_analytics_id = module.region_us_west_1[0].sg_analytics_id
+//  sg_analyticsdb_id = module.region_us_west_1[0].sg_analyticsdb_id
+//  db_name_port_host = module.region_us_west_1[0].db_name_port_host
+//  ec2_analytics_role_name = module.iam.ec2_analytics_role_name
+//}
 
 
 module "iam" {
@@ -107,8 +113,9 @@ module "iam" {
   secret_arns = module.region_us_west_1[0].secret_arns
   secret_kms_ids = local.secret_kms_ids
   ssm_kms_ids = local.ssm_kms_ids
-  analytics_ssm_env_arns = module.region_us_west_1[0].analytics_ssm_env_arns
-  analytics_secret_arns = module.region_us_west_1[0].analytics_secret_arns
-  analytics_secret_kms_id = module.region_us_west_1[0].analytics_secret_kms_id
-  analytics_ssm_kms_id = module.region_us_west_1[0].analytics_ssm_kms_id
+//  analytics_ssm_env_arns = module.region_us_west_1[0].analytics_ssm_env_arns
+//  analytics_secret_arns = module.region_us_west_1[0].analytics_secret_arns
+//  analytics_secret_kms_id = module.region_us_west_1[0].analytics_secret_kms_id
+//  analytics_ssm_kms_id = module.region_us_west_1[0].analytics_ssm_kms_id
+  ecs_kms_arns = local.ecs_kms_arns
 }

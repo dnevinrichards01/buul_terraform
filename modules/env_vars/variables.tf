@@ -69,19 +69,38 @@ variable "kms_aliases" {
   type = map(string)
 }
 
-variable "analytics_db_user_username" {
-  type = string
-}
+//variable "analytics_db_user_username" {
+//  type = string
+//}
 
-variable "analytics_db_user_password" {
+//variable "analytics_db_user_password" {
+//  type = string
+//  sensitive = true
+//}
+
+//variable "analytics_db_name_port_host" {
+//  type = map(string)
+//}
+
+//variable "analytics_ec2_role_arn" {
+//  type = string
+//}
+
+variable "anonymize_user_hmac_key" {
   type = string
   sensitive = true
 }
 
-variable "analytics_db_name_port_host" {
-  type = map(string)
+variable "notifications_email" {
+  type = string
+  sensitive = true
 }
 
-variable "analytics_ec2_role_arn" {
+variable "sendgrid_api_key" {
+  type = string
+  sensitive = true
+}
+
+variable "domain" {
   type = string
 }

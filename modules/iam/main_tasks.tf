@@ -25,10 +25,11 @@ data "aws_iam_policy_document" "ecs_task_logs" {
         "logs:CreateLogGroup",
         "logs:PutLogEvents"
       ]
-      resources = [
+      resources = compact([
         "arn:aws:logs:${statement.value}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.environment}/${each.key}:log-stream:*",
-        "arn:aws:logs:${statement.value}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.environment}/debug:log-stream:*"
-      ]
+        each.key == "app" ? "arn:aws:logs:${statement.value}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.environment}/debug-latest:log-stream:*" : null,
+        each.key == "app" ? "arn:aws:logs:${statement.value}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.environment}/debug-current:log-stream:*" : null
+      ])
     }
   }
 }
@@ -60,11 +61,11 @@ data "aws_iam_policy_document" "ecs_exec" {
             "ssmmessages:OpenDataChannel"
         ]
         resources = ["*"]
-        condition {
-            test     = "StringEquals"
-            variable = "aws:sourceVpce"
-            values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
-        }
+        //condition {
+        //    test     = "StringEquals"
+        //    variable = "aws:sourceVpce"
+        //    values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
+        //}
     }
   }
   dynamic "statement" {
@@ -75,11 +76,11 @@ data "aws_iam_policy_document" "ecs_exec" {
             "ecs:ExecuteCommand"
         ]
         resources = ["arn:aws:ecs:${statement.value}:${data.aws_caller_identity.current.account_id}:task-definition/${var.environment}-${each.value}:*"]
-        condition {
-            test     = "StringEquals"
-            variable = "aws:sourceVpce"
-            values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
-        }
+        //condition {
+        //    test     = "StringEquals"
+        //    variable = "aws:sourceVpce"
+        //    values   = concat(var.vpce_ids["ssm"], var.vpce_ids["ssmmessages"])
+        //}
     }
   }
 }
@@ -141,8 +142,8 @@ data "aws_iam_policy_document" "ecs_read_secrets" {
       effect  = "Allow"
       actions = ["secretsmanager:GetSecretValue"]
       resources = [
-        for secret, arn in var.secret_arns :
-        "arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:ecs/${var.environment}/${secret}"
+        for secret, arn in var.secret_arns : arn
+        //"arn:aws:secretsmanager:${statement.value}:${data.aws_caller_identity.current.account_id}:secret:ecs/${var.environment}/${secret}"
       ]
     }
   }
@@ -179,8 +180,8 @@ data "aws_iam_policy_document" "ecs_ssm_parameter" {
             "ssm:DescribeParameters"
         ]
         resources = [
-            for env_var, arn in var.ssm_env_arns : 
-            "arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/ecs/${var.environment}/${env_var}"
+            for env_var, arn in var.ssm_env_arns : arn
+            //"arn:aws:ssm:${statement.value}:${data.aws_caller_identity.current.account_id}:parameter/ecs/${var.environment}/${env_var}"
         ]
     }
   }
@@ -206,6 +207,29 @@ resource "aws_iam_role_policy_attachment" "ecs_ssm_parameter" {
   policy_arn = aws_iam_policy.ecs_ssm_parameter.arn
 } 
 
+data "aws_iam_policy_document" "db_encryption_kms" {
+  dynamic "statement" {
+    for_each = toset(var.regions)
+    content {
+        effect  = "Allow"
+        actions = [
+            "kms:Decrypt",
+            "kms:DescribeKey"
+        ]
+        resources = var.ecs_kms_arns
+    } 
+  }
+}
+resource "aws_iam_policy" "db_encryption_kms" {
+  name   = "${var.environment}-ecs-db-kms-encryption"
+  policy = data.aws_iam_policy_document.db_encryption_kms.json
+}
+resource "aws_iam_role_policy_attachment" "db_encryption_kms" {
+  for_each = toset(local.containers)
+  role       = aws_iam_role.ecs_task_execution[each.value].name
+  policy_arn = aws_iam_policy.db_encryption_kms.arn
+} 
+
 
 // do kms here for ecr???
 
@@ -221,4 +245,10 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+
+resource "aws_iam_role_policy_attachment" "ecs_ssm_session" {
+  for_each = toset(local.containers)
+  role       = aws_iam_role.ecs_task_execution[each.value].name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
 

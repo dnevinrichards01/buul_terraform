@@ -16,7 +16,11 @@ module "prod" {
   plaid_client_id = var.plaid_client_id
   email_host_password = var.email_host_password
   email_host_user = var.email_host_user
+  notifications_email = var.notifications_email
+  sendgrid_api_key = var.sendgrid_api_key
+
   fmp_key = var.fmp_key
+  anonymize_user_hmac_key = var.anonymize_user_hmac_key
   hosted_zone_id = module.domain_records.hosted_zone_id
   validation_record_fqdns = module.domain_records.validation_record_fqdns
   analytics_db_master_password = var.analytics_db_master_password

@@ -10,12 +10,20 @@ locals {
   // 
     
   services = ["app", "celery", "beat"]
-  tasks = ["app", "celery", "beat", "debug"]
+  tasks = ["app", "celery", "beat", "debug-current", "debug-latest"]
   ecr_repo_names = {
     app = var.ecr_repo_names["app"],
     celery = var.ecr_repo_names["celery"],
     beat = var.ecr_repo_names["beat"],
-    debug = var.ecr_repo_names["app"]
+    debug-current = var.ecr_repo_names["app"]
+    debug-latest = var.ecr_repo_names["app"]
+  }
+  image_versions = {
+    app = "current",
+    celery = "current",
+    beat = "current",
+    debug-current = "current",
+    debug-latest = "latest"
   }
 
 
@@ -24,7 +32,7 @@ locals {
     task => [
       {
         name  = "${var.environment}-${task}"
-        image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/${local.ecr_repo_names[task]}:current"
+        image = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/${local.ecr_repo_names[task]}:${local.image_versions[task]}"
         cpu   = 0 // just gives it the tasks's total cpu
         essential = true
 
