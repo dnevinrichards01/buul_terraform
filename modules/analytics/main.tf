@@ -90,7 +90,7 @@ resource "aws_dms_replication_subnet_group" "ec2_analytics" {
   subnet_ids = var.data_subnet_ids
 }
 resource "aws_iam_role" "analytics_dms_vpc_role" {
-  name = "dms-vpc-role"
+  name = "${var.environment}-dms-vpc-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",

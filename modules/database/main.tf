@@ -19,6 +19,8 @@ resource "aws_db_instance" "postgres" {
   backup_retention_period = 7
   backup_window            = "06:00-07:00"
 
+  skip_final_snapshot = true
+
   //lifecycle {
   //  prevent_destroy = true
   //}

@@ -30,7 +30,7 @@ resource "aws_codebuild_project" "project" {
     }
   }
 
-  source_version = "aws"
+  source_version = "test"
     
   tags = {
     Environment = var.environment

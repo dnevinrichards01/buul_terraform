@@ -65,7 +65,6 @@ resource "aws_route_table" "app" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    ipv6_cidr_block = "::/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
 
