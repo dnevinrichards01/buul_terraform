@@ -14,7 +14,7 @@ locals {
     REDIS_HOST               = var.redis_no_cluster_host_port_url["host"]
     REDIS_URL                = var.redis_no_cluster_host_port_url["url"]
     REDIS_PORT               = var.redis_no_cluster_host_port_url["port"]
-    REDIS_CAFILE_PATH        = "/code/conf_files/redis-bundle.pem",
+    REDIS_CAFILE_PATH        = "/code/conf_files/redis-bundle.pem"
   }
   env_vars = merge(local.django_env_vars, var.kms_aliases)
   db_username_final = "${var.environment}${var.db_username}"
@@ -62,5 +62,33 @@ locals {
     key => jsonencode(secret)
   }
   
+  proxy_secrets = {
+    DB_CREDENTIALS     = {
+      username = var.proxy_db_user_username,
+      password = var.proxy_db_user_password
+    }
+    MASTER_KEY         = {
+      master_key = var.proxy_master_key
+    }
+  }
+  proxy_secret_jsons = {
+    for key, secret in local.proxy_secrets :
+    key => jsonencode(secret)
+  }
+  proxy_django_env_vars = {
+    DB_PORT                  = var.proxy_db_name_port_host["port"]
+    DB_NAME                  = var.proxy_db_name_port_host["name"] 
+    DB_HOST                  = var.proxy_db_name_port_host["host"]
+    DB_CAFILE_PATH           = "/code/conf_files/rds-us-west-1-bundle.pem"
+    DEBUG                    = "False"
+    SQS_USER_INTERACTION_URL = var.sqs_urls["user-interaction"]
+    SQS_LONG_RUNNING_URL     = var.sqs_urls["long-running"]
+    SQS_DLQ_URL              = var.sqs_urls["dlq"]
+    REDIS_HOST               = var.redis_no_cluster_host_port_url["host"]
+    REDIS_URL                = var.redis_no_cluster_host_port_url["url"]
+    REDIS_PORT               = var.redis_no_cluster_host_port_url["port"]
+    REDIS_CAFILE_PATH        = "/code/conf_files/redis-bundle.pem"
+  }
+  proxy_env_vars = merge(local.django_env_vars, var.kms_aliases)
   
 }

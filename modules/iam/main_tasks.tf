@@ -207,28 +207,28 @@ resource "aws_iam_role_policy_attachment" "ecs_ssm_parameter" {
   policy_arn = aws_iam_policy.ecs_ssm_parameter.arn
 } 
 
-data "aws_iam_policy_document" "db_encryption_kms" {
-  dynamic "statement" {
-    for_each = toset(var.regions)
-    content {
-        effect  = "Allow"
-        actions = [
-            "kms:Decrypt",
-            "kms:DescribeKey"
-        ]
-        resources = var.ecs_kms_arns
-    } 
-  }
-}
-resource "aws_iam_policy" "db_encryption_kms" {
-  name   = "${var.environment}-ecs-db-kms-encryption"
-  policy = data.aws_iam_policy_document.db_encryption_kms.json
-}
-resource "aws_iam_role_policy_attachment" "db_encryption_kms" {
-  for_each = toset(local.containers)
-  role       = aws_iam_role.ecs_task_execution[each.value].name
-  policy_arn = aws_iam_policy.db_encryption_kms.arn
-} 
+//data "aws_iam_policy_document" "db_encryption_kms" {
+//  dynamic "statement" {
+//    for_each = toset(var.regions)
+//    content {
+//        effect  = "Allow"
+//        actions = [
+//            "kms:Decrypt",
+//            "kms:DescribeKey"
+//        ]
+//        resources = var.ecs_kms_arns
+//    } 
+//  }
+//}
+//resource "aws_iam_policy" "db_encryption_kms" {
+//  name   = "${var.environment}-ecs-db-kms-encryption"
+//  policy = data.aws_iam_policy_document.db_encryption_kms.json
+//}
+//resource "aws_iam_role_policy_attachment" "db_encryption_kms" {
+//  for_each = toset(local.containers)
+//  role       = aws_iam_role.ecs_task_execution[each.value].name
+//  policy_arn = aws_iam_policy.db_encryption_kms.arn
+//} 
 
 
 // do kms here for ecr???

@@ -4,9 +4,7 @@ resource "aws_ecs_cluster" "ecs" {
   name = "${var.environment}-cluster"
 }
 
-
 // services
-
 resource "aws_ecs_service" "services" {
   for_each = toset(local.services)
 
@@ -40,9 +38,7 @@ resource "aws_ecs_service" "services" {
   }
 }
 
-
 // tasks
-
 resource "aws_ecs_task_definition" "tasks" {
   for_each = toset(local.tasks)
 
@@ -60,6 +56,57 @@ resource "aws_ecs_task_definition" "tasks" {
 
   container_definitions = jsonencode(local.task_definitions[each.value])
 }
+
+
+
+// proxy segment of cluster
+
+// services
+resource "aws_ecs_service" "proxy_services" {
+  for_each = toset(local.proxy_services)
+
+  name            = "${var.environment}-${each.value}"
+  cluster         = aws_ecs_cluster.ecs.id
+  task_definition = aws_ecs_task_definition.proxy_tasks[each.value].arn
+  launch_type     = "FARGATE"
+  desired_count = var.desired_counts_by_service[each.value]
+  
+  network_configuration {
+    subnets         = var.app_subnet_ids
+    security_groups = [var.app_security_group_id]
+    assign_public_ip = false
+  }
+
+  // force_new_deployment    = true // need to re-deploy for sg / subnet changes
+  enable_execute_command = true
+
+  lifecycle {
+    ignore_changes = [desired_count, task_definition]
+  }
+}
+
+// tasks
+resource "aws_ecs_task_definition" "proxy_tasks" {
+  for_each = toset(local.proxy_tasks)
+
+  family                   = "${var.environment}-${each.value}"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "1024"
+  memory                   = "3072"
+  network_mode             = "awsvpc"
+  execution_role_arn       = var.proxy_task_role_arn
+  task_role_arn            = var.proxy_task_role_arn
+  runtime_platform {
+    cpu_architecture        = "X86_64"
+    operating_system_family = "LINUX"
+  }
+
+  container_definitions = jsonencode(local.proxy_task_definitions[each.value])
+}
+
+
+
+
 
 
 // kms

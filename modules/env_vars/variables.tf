@@ -104,3 +104,32 @@ variable "sendgrid_api_key" {
 variable "domain" {
   type = string
 }
+
+//
+
+variable "proxy_master_key" {
+  type = string
+  sensitive = true
+}
+
+variable "proxy_role_arn" {
+  type = string
+}
+
+variable "proxy_db_user_username" {
+  type = string
+  sensitive = true
+}
+
+variable "proxy_db_user_password" {
+  type = string
+  sensitive = true
+}
+
+variable "proxy_db_name_port_host" {
+  type = map(string)
+}
+
+
+  
+  

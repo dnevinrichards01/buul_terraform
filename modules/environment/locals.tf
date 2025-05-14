@@ -30,4 +30,14 @@ locals {
     contains(var.regions, "us-west-1") ? module.region_us_west_1[0].ecs_kms_arns : null,
     contains(var.regions, "us-west-2") ? module.region_us_west_2[0].ecs_kms_arns : null,
   ]))
+
+
+  proxy_secret_kms_ids = compact([
+    contains(var.regions, "us-west-1") ? module.region_us_west_1[0].proxy_secret_kms_id : null,
+    contains(var.regions, "us-west-2") ? module.region_us_west_2[0].proxy_secret_kms_id : null,
+  ])
+  proxy_ssm_kms_ids = compact([
+    contains(var.regions, "us-west-1") ? module.region_us_west_1[0].proxy_ssm_kms_id : null,
+    contains(var.regions, "us-west-2") ? module.region_us_west_2[0].proxy_ssm_kms_id : null,
+  ])
 }

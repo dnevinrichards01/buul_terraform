@@ -28,6 +28,9 @@ output "secret_kms_id" {
     value = aws_kms_key.secret.arn
 }
 
+
+
+
 output "analytics_ssm_env_arns" {
   value = {
     for key, param in aws_ssm_parameter.analytics_ssm_env_vars :
@@ -49,3 +52,31 @@ output "analytics_secret_kms_id" {
 output "analytics_ssm_kms_id" {
     value = aws_kms_key.analytics_ssm.arn
 }
+
+//
+
+output "proxy_ssm_env_arns" {
+  value = {
+    for key, param in aws_ssm_parameter.proxy_env_vars : 
+    key => param.arn
+  }
+}
+
+output "proxy_secret_arns" {
+  value = {
+    for key, secret in aws_secretsmanager_secret.proxy_secrets : 
+    key => secret.arn
+  }
+}
+
+output "proxy_secret_kms_id" {
+    value = aws_kms_key.proxy_secret.arn
+}
+
+output "proxy_ssm_kms_id" {
+    value = aws_kms_key.proxy_ssm.arn
+}
+
+
+
+

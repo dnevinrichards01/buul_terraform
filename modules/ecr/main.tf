@@ -25,7 +25,7 @@ data "aws_iam_policy_document" "resource_policy" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = [var.ecs_task_role_arns[each.value]]
+      identifiers = [each.value == "proxy" ? var.proxy_role_arn: var.ecs_task_role_arns[each.value]]
     }
     actions = [
       "ecr:GetAuthorizationToken",

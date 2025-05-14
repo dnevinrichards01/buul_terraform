@@ -11,3 +11,7 @@ variable "region" {
 variable "ecs_task_role_arns" {
   type = map(string)
 }
+
+variable "proxy_role_arn" {
+  type = string
+}

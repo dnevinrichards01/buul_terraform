@@ -73,3 +73,21 @@ output "analytics_ssm_kms_id" {
 output "ecs_kms_arns" {
     value = module.ecs.kms_arns
 }
+
+///
+
+output "proxy_ssm_env_arns" {
+    value = data.aws_region.region.name == "us-west-1" ? module.env_vars.proxy_ssm_env_arns : null
+}
+
+output "proxy_secret_arns" {
+    value = data.aws_region.region.name == "us-west-1" ? module.env_vars.proxy_secret_arns : null
+}
+
+output "proxy_secret_kms_id" {
+    value = data.aws_region.region.name == "us-west-1" ? module.env_vars.proxy_secret_kms_id : null
+}
+
+output "proxy_ssm_kms_id" {
+    value = data.aws_region.region.name == "us-west-1" ? module.env_vars.proxy_ssm_kms_id : null
+}

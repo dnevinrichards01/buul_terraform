@@ -49,3 +49,25 @@ variable "analytics_ssm_kms_id" {
 variable "ecs_kms_arns" {
   type = list(string)
 }
+
+///
+
+variable "proxy_ssm_env_arns" {
+  type = map(string)
+}
+
+variable "proxy_secret_arns" {
+  type = map(string)
+}
+
+variable "proxy_secret_kms_ids" {
+  type = list(string)
+}
+
+variable "proxy_ssm_kms_ids" {
+  type = list(string)
+}
+
+  
+  
+  

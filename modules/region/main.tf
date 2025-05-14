@@ -20,6 +20,7 @@ module "ecr" {
   region = data.aws_region.region.name
   environment = var.environment
   ecs_task_role_arns = var.ecs_task_role_arns
+  proxy_role_arn = var.proxy_role_arn
 }
 
 
@@ -45,6 +46,10 @@ module "ecs" {
   ecs_task_role_arns = var.ecs_task_role_arns
   acm_cert_arn = module.acm_cert.acm_cert_arn
   vpce_ids = module.vpc.vpce_ids
+
+  proxy_secret_arns = module.env_vars.proxy_secret_arns
+  proxy_ssm_env_arns = module.env_vars.proxy_ssm_env_arns
+  proxy_task_role_arn = var.proxy_role_arn
 }
 
 
@@ -89,6 +94,12 @@ module "env_vars" {
   analytics_ec2_role_arn = var.analytics_ec2_role_arn
   anonymize_user_hmac_key = var.anonymize_user_hmac_key
   domain = var.domain
+
+  proxy_master_key = var.proxy_master_key
+  proxy_role_arn = var.proxy_role_arn
+  proxy_db_user_username = var.proxy_db_user_username
+  proxy_db_user_password = var.proxy_db_user_password
+  proxy_db_name_port_host = module.database.proxy_db_name_port_host
 }
 
 
@@ -129,6 +140,9 @@ module "database" {
   data_security_group_id = module.vpc.sg_data_id
   db_username_final = module.env_vars.db_username_final
   db_password_final = module.env_vars.db_password_final
+
+  proxy_db_user_username = var.proxy_db_user_username
+  proxy_db_user_password = var.proxy_db_user_password
 }
 
 

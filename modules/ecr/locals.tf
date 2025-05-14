@@ -1,3 +1,3 @@
 locals {
-  repos = ["app", "celery", "beat"]
+  repos = ["app", "celery", "beat", "proxy"]
 }

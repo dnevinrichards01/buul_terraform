@@ -22,3 +22,14 @@ variable "db_password_final" {
   type      = string
   sensitive = true
 }
+
+///
+
+variable "proxy_db_user_username" {
+  type = string
+}
+
+variable "proxy_db_user_password" {
+  type = string
+  sensitive = true
+}

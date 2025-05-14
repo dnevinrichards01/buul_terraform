@@ -27,6 +27,12 @@ module "region_us_west_1" {
   analytics_db_user_password = var.analytics_db_user_password
   analytics_db_user_username = var.analytics_db_user_username
   analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
+
+  proxy_master_key = var.proxy_master_key
+  proxy_db_user_username = var.proxy_db_user_username
+  proxy_db_user_password = var.proxy_db_user_password
+  proxy_role_arn = module.iam.proxy_role_arn
+  proxy_role_name = module.iam.proxy_role_name
 }
 
 module "region_us_west_2" {
@@ -58,6 +64,12 @@ module "region_us_west_2" {
   analytics_db_user_password = var.analytics_db_user_password
   analytics_db_user_username = var.analytics_db_user_username
   analytics_db_name_port_host = module.analytics.analytics_db_name_port_host
+
+  proxy_master_key = var.proxy_master_key
+  proxy_db_user_username = var.proxy_db_user_username
+  proxy_db_user_password = var.proxy_db_user_password
+  proxy_role_arn = module.iam.proxy_role_arn
+  proxy_role_name = module.iam.proxy_role_name
 }
 
 module "latency_routing" {
@@ -118,4 +130,9 @@ module "iam" {
   analytics_secret_kms_id = module.region_us_west_1[0].analytics_secret_kms_id
   analytics_ssm_kms_id = module.region_us_west_1[0].analytics_ssm_kms_id
   ecs_kms_arns = local.ecs_kms_arns
+
+  proxy_ssm_env_arns = module.region_us_west_1[0].proxy_ssm_env_arns
+  proxy_secret_arns = module.region_us_west_1[0].proxy_secret_arns
+  proxy_secret_kms_ids = local.proxy_secret_kms_ids
+  proxy_ssm_kms_ids = local.proxy_ssm_kms_ids
 }

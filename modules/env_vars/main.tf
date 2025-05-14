@@ -245,6 +245,130 @@ resource "aws_secretsmanager_secret_policy" "analytics_ec2_secrets_policies" {
   policy     = data.aws_iam_policy_document.analytics_ec2_secrets_policy[each.key].json
 }
 
+
+// proxy
+// make only for us-west-1, make this an instance of an env_var module
+resource "aws_kms_key" "proxy_ssm" {
+  description             = "KMS key for encrypting proxy SSM parameters"
+  enable_key_rotation     = true
+  deletion_window_in_days = 10
+  policy = data.aws_iam_policy_document.proxy_ssm_kms_resource.json
+}
+data "aws_iam_policy_document" "proxy_ssm_kms_resource" {
+  statement {
+    effect  = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [var.proxy_role_arn]
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [var.vpce_ids["ssm"]]
+    }
+  }
+  statement {
+    sid     = "EnableRootAccess"
+    effect  = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+}
+resource "aws_ssm_parameter" "proxy_env_vars" {
+  for_each = local.proxy_env_vars
+
+  name  = "/proxy/${var.environment}/${each.key}"
+  type  = "SecureString"
+  value = each.value
+  key_id = aws_kms_key.proxy_ssm.id
+}
+
+
+// secrets
+resource "aws_kms_key" "proxy_secret" {
+  description             = "KMS CMK for encrypting proxy Secrets Manager secrets"
+  enable_key_rotation     = true
+  deletion_window_in_days = 10
+  policy = data.aws_iam_policy_document.proxy_secret_kms_resource.json
+}
+data "aws_iam_policy_document" "proxy_secret_kms_resource" {
+  statement {
+    effect  = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [var.proxy_role_arn]
+    }
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [var.vpce_ids["secretsmanager"]]
+    }
+  }
+  statement {
+    sid     = "EnableRootAccess"
+    effect  = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+}
+resource "aws_secretsmanager_secret" "proxy_secrets" {
+  for_each = local.proxy_secret_jsons
+  name = "proxy/${var.environment}/${each.key}"
+  kms_key_id = aws_kms_key.proxy_secret.id
+}
+resource "aws_secretsmanager_secret_version" "proxy_secrets_values" {
+  for_each      = local.proxy_secret_jsons
+  secret_id     = aws_secretsmanager_secret.proxy_secrets[each.key].id
+  secret_string = each.value
+}
+data "aws_iam_policy_document" "proxy_secrets_policy" {
+  for_each      = local.proxy_secret_jsons
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [var.proxy_role_arn]
+    }
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [var.vpce_ids["secretsmanager"]]
+    }
+    resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:proxy/${var.environment}/${each.key}"]
+  }
+}
+resource "aws_secretsmanager_secret_policy" "proxy_secrets_policies" {
+  for_each   = local.proxy_secret_jsons
+  secret_arn = aws_secretsmanager_secret.proxy_secrets[each.key].arn
+  policy     = data.aws_iam_policy_document.proxy_secrets_policy[each.key].json
+}
+
 data "aws_caller_identity" "current" {}
 
 

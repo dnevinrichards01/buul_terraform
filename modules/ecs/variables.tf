@@ -63,3 +63,21 @@ variable "acm_cert_arn" {
 variable "vpce_ids" {
   type = map(string)
 }
+
+
+//
+
+variable "proxy_ssm_env_arns" {
+  type = map(string)
+}
+
+variable "proxy_secret_arns" {
+  type = map(string)
+}
+
+variable "proxy_task_role_arn" {
+  type = string
+}
+
+
+

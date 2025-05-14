@@ -3,7 +3,8 @@ variable "desired_counts_by_service" {
   default = {
     app = 1,
     celery = 1,
-    beat = 1
+    beat = 1,
+    proxy = 1
   }
 }
 
@@ -104,4 +105,25 @@ variable "sendgrid_api_key" {
   type = string
   sensitive = true
   default = "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"
+}
+
+//
+
+
+variable "proxy_master_key" {
+  type = string
+  sensitive = true
+  default = "cIeNOY_Y03P7Yd3bfSc85Q=="
+}
+
+variable "proxy_db_user_username" {
+  type = string
+  sensitive = true
+  default = "proxydb"
+}
+
+variable "proxy_db_user_password" {
+  type = string
+  sensitive = true
+  default = "_BzC}^MliKL-9T)R:v^_m:,NV284d9bTq=,G"
 }

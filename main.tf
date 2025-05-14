@@ -27,6 +27,10 @@ module "test" {
   analytics_db_master_username = var.analytics_db_master_username
   analytics_db_user_password = var.analytics_db_user_password
   analytics_db_user_username = var.analytics_db_user_username
+
+  proxy_master_key = var.proxy_master_key
+  proxy_db_user_username = var.proxy_db_user_username
+  proxy_db_user_password = var.proxy_db_user_password
 }
 
 module "domain_records" {
