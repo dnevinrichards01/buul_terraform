@@ -30,4 +30,11 @@ locals {
     contains(var.regions, "us-west-1") ? module.region_us_west_1[0].ecs_kms_arns : null,
     #contains(var.regions, "us-west-2") ? module.region_us_west_2[0].ecs_kms_arns : null,
   ]))
+  monitoring_logs_bucket_arns = compact([
+    contains(var.regions, "us-west-1") ? module.region_us_west_1[0].monitoring_logs_bucket_arn : null,
+    #contains(var.regions, "us-west-2") ? module.region_us_west_2[0].monitoring_logs_bucket_arn : null,
+  ])
+  cloudtrail_bucket_arn = module.region_us_west_1[0].monitoring_logs_bucket_arn
+
+  codebuild_kms_arns = [module.region_us_west_1[0].ssm_kms_id, module.region_us_west_1[0].secret_kms_id]
 }

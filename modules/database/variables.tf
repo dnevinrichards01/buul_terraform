@@ -12,7 +12,7 @@ variable "data_subnet_ids" {
 
 variable "data_security_group_id" {
   type = string
-} 
+}
 
 variable "db_username_final" {
   type = string

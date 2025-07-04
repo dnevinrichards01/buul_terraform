@@ -10,8 +10,8 @@ resource "aws_sqs_queue" "user_interaction" {
   fifo_queue                 = false
   visibility_timeout_seconds = 10
   message_retention_seconds  = 345600 # 4 days
-  max_message_size      = 262144  # 256 KB
-  receive_wait_time_seconds = 20
+  max_message_size           = 262144 # 256 KB
+  receive_wait_time_seconds  = 20
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
@@ -28,8 +28,8 @@ resource "aws_sqs_queue" "long_running" {
   fifo_queue                 = false
   visibility_timeout_seconds = 10
   message_retention_seconds  = 345600 # 4 days
-  max_message_size      = 262144  # 256 KB
-  receive_wait_time_seconds = 20
+  max_message_size           = 262144 # 256 KB
+  receive_wait_time_seconds  = 20
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
@@ -44,7 +44,7 @@ resource "aws_sqs_queue" "long_running" {
 data "aws_iam_policy_document" "sqs_access" {
   for_each = toset(local.queues)
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "SQS:SendMessage",
       "SQS:ChangeMessageVisibility",
@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "sqs_access" {
       "SQS:ReceiveMessage"
     ]
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = values(var.ecs_task_role_arns)
     }
     resources = [

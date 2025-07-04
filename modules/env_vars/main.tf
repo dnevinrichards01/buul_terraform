@@ -4,14 +4,14 @@ resource "aws_kms_key" "ssm" {
   description             = "KMS key for encrypting SSM parameters"
   enable_key_rotation     = true
   deletion_window_in_days = 10
-  policy = data.aws_iam_policy_document.ssm_kms_resource.json
+  policy                  = data.aws_iam_policy_document.ssm_kms_resource.json
 }
 data "aws_iam_policy_document" "ssm_kms_resource" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = values(var.ecs_task_role_arns)
+      identifiers = concat(values(var.ecs_task_role_arns), [var.codebuild_role_arn])
     }
     actions = [
       "kms:Decrypt",
@@ -23,10 +23,10 @@ data "aws_iam_policy_document" "ssm_kms_resource" {
       variable = "aws:sourceVpce"
       values   = [var.vpce_ids["ssm"]]
     }
-  } 
+  }
   statement {
-    sid     = "EnableRootAccess"
-    effect  = "Allow"
+    sid    = "EnableRootAccess"
+    effect = "Allow"
 
     principals {
       type        = "AWS"
@@ -40,9 +40,9 @@ data "aws_iam_policy_document" "ssm_kms_resource" {
 resource "aws_ssm_parameter" "env_vars" {
   for_each = local.env_vars
 
-  name  = "/ecs/${var.environment}/${each.key}"
-  type  = "SecureString"
-  value = each.value
+  name   = "/ecs/${var.environment}/${each.key}"
+  type   = "SecureString"
+  value  = each.value
   key_id = aws_kms_key.ssm.id
 }
 
@@ -52,14 +52,14 @@ resource "aws_kms_key" "secret" {
   description             = "KMS CMK for encrypting Secrets Manager secrets"
   enable_key_rotation     = true
   deletion_window_in_days = 10
-  policy = data.aws_iam_policy_document.secret_kms_resource.json
+  policy                  = data.aws_iam_policy_document.secret_kms_resource.json
 }
 data "aws_iam_policy_document" "secret_kms_resource" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = values(var.ecs_task_role_arns)
+      identifiers = concat(values(var.ecs_task_role_arns), [var.codebuild_role_arn])
     }
     actions = [
       "kms:Decrypt",
@@ -73,8 +73,8 @@ data "aws_iam_policy_document" "secret_kms_resource" {
     }
   }
   statement {
-    sid     = "EnableRootAccess"
-    effect  = "Allow"
+    sid    = "EnableRootAccess"
+    effect = "Allow"
 
     principals {
       type        = "AWS"
@@ -86,8 +86,8 @@ data "aws_iam_policy_document" "secret_kms_resource" {
   }
 }
 resource "aws_secretsmanager_secret" "secrets" {
-  for_each = local.secret_jsons
-  name = "ecs/${var.environment}/${each.key}"
+  for_each   = local.secret_jsons
+  name       = "ecs/${var.environment}/${each.key}"
   kms_key_id = aws_kms_key.secret.id
 }
 resource "aws_secretsmanager_secret_version" "secret_values" {
@@ -96,7 +96,7 @@ resource "aws_secretsmanager_secret_version" "secret_values" {
   secret_string = each.value
 }
 data "aws_iam_policy_document" "secrets_policy" {
-  for_each      = local.secret_jsons
+  for_each = local.secret_jsons
   statement {
     effect = "Allow"
     principals {
@@ -248,4 +248,53 @@ resource "aws_secretsmanager_secret_policy" "secret_policies" {
 data "aws_caller_identity" "current" {}
 
 
+
+
+// codebuild ssm
+
+resource "aws_ssm_parameter" "codebuild_env_vars" {
+  for_each = local.codebuild_env_vars
+  
+  name   = "/codebuild/${var.environment}/${each.key}"
+  type   = "SecureString"
+  value  = each.value
+  key_id = aws_kms_key.ssm.id
+}
+
+// codebuild secrets
+resource "aws_secretsmanager_secret" "codebuild_secrets" {
+  for_each   = local.codebuild_secret_jsons
+  name       = "codebuild/${var.environment}/${each.key}"
+  kms_key_id = aws_kms_key.secret.id
+}
+resource "aws_secretsmanager_secret_version" "codebuild_secret_values" {
+  for_each      = local.codebuild_secret_jsons
+  secret_id     = aws_secretsmanager_secret.codebuild_secrets[each.key].id
+  secret_string = each.value
+}
+data "aws_iam_policy_document" "codebuild_secrets_policy" {
+  for_each = local.codebuild_secret_jsons
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = [var.codebuild_role_arn]
+    }
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret"
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:sourceVpce"
+      values   = [var.vpce_ids["secretsmanager"]]
+    }
+    resources = ["arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:codebuild/${var.environment}/${each.key}"]
+  }
+}
+resource "aws_secretsmanager_secret_policy" "codebuild_secret_policies" {
+  for_each   = local.codebuild_secret_jsons
+  secret_arn = aws_secretsmanager_secret.codebuild_secrets[each.key].arn
+  policy     = data.aws_iam_policy_document.codebuild_secrets_policy[each.key].json
+}
 

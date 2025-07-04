@@ -1,23 +1,23 @@
 resource "aws_db_instance" "postgres" {
   identifier              = "${var.environment}db"
   engine                  = "postgres"
-  engine_version          = "16.4"
+  engine_version          = "16.8"
   instance_class          = "db.t3.small"
   allocated_storage       = 20
   max_allocated_storage   = 100
   storage_type            = "gp2"
-  storage_encrypted = true
+  storage_encrypted       = true
   multi_az                = true
   db_name                 = "${var.environment}db"
   username                = var.db_username_final
   password                = var.db_password_final
   port                    = 5432
   publicly_accessible     = false
-  deletion_protection     = false//true
+  deletion_protection     = false //true
   vpc_security_group_ids  = [var.data_security_group_id]
   db_subnet_group_name    = aws_db_subnet_group.postgres.name
   backup_retention_period = 7
-  backup_window            = "06:00-07:00"
+  backup_window           = "06:00-07:00"
 
   //lifecycle {
   //  prevent_destroy = true

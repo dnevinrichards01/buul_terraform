@@ -1,10 +1,10 @@
 // resources needed for all subnets
 
 resource "aws_vpc" "vpc" {
-  cidr_block           = "10.0.0.0/16"
-  assign_generated_ipv6_cidr_block  = true 
-  enable_dns_hostnames = true
-  enable_dns_support = true
+  cidr_block                       = "10.0.0.0/16"
+  assign_generated_ipv6_cidr_block = true
+  enable_dns_hostnames             = true
+  enable_dns_support               = true
 
   tags = {
     Name = "${var.environment}-vpc"
@@ -24,7 +24,7 @@ resource "aws_route_table" "public" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    ipv6_cidr_block = "::/0"
+    //ipv6_cidr_block = "::/0"
     gateway_id = aws_internet_gateway.igw.id
   }
 
@@ -56,12 +56,12 @@ module "subnets_by_az" {
   az       = each.value
   az_index = each.key
 
-  vpc_id        = aws_vpc.vpc.id
-  rt_public_id  = aws_route_table.public.id
-  rt_private_id = aws_route_table.private.id
-  igw_id = aws_internet_gateway.igw.id
+  vpc_id              = aws_vpc.vpc.id
+  rt_public_id        = aws_route_table.public.id
+  rt_private_id       = aws_route_table.private.id
+  igw_id              = aws_internet_gateway.igw.id
   vpc_ipv6_cidr_block = aws_vpc.vpc.ipv6_cidr_block
-  vpc_cidr_block = aws_vpc.vpc.cidr_block
+  vpc_cidr_block      = aws_vpc.vpc.cidr_block
 }
 
 
@@ -82,7 +82,7 @@ resource "aws_security_group_rule" "alb_accepts_internet" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.alb.id
 }
 resource "aws_security_group_rule" "alb_to_app" {
@@ -122,7 +122,7 @@ resource "aws_security_group_rule" "app_to_internet" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.app.id
 }
 resource "aws_security_group_rule" "app_to_smtp" {
@@ -132,7 +132,7 @@ resource "aws_security_group_rule" "app_to_smtp" {
   to_port           = 587
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.app.id
 }
 resource "aws_security_group_rule" "app_to_redis" {
@@ -207,8 +207,8 @@ resource "aws_security_group_rule" "analyticsdb_accepts_analytics" {
 // security group analytics
 
 resource "aws_security_group" "analytics" {
-  name        = "${var.environment}-sg-analytics_ec2"
-  vpc_id      = aws_vpc.vpc.id
+  name   = "${var.environment}-sg-analytics_ec2"
+  vpc_id = aws_vpc.vpc.id
 
   tags = {
     Name = "${var.environment}-sg-analytics_ec2"
@@ -221,7 +221,7 @@ resource "aws_security_group_rule" "analytics_to_internet_https" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.analytics.id
 }
 resource "aws_security_group_rule" "analytics_to_internet_http" {
@@ -231,7 +231,7 @@ resource "aws_security_group_rule" "analytics_to_internet_http" {
   to_port           = 80
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
-  ipv6_cidr_blocks = ["::/0"]
+  ipv6_cidr_blocks  = ["::/0"]
   security_group_id = aws_security_group.analytics.id
 }
 resource "aws_security_group_rule" "analytics_to_ssm" {
@@ -275,7 +275,7 @@ resource "aws_security_group_rule" "vpce_accepts_app_requests" {
 
 
 // security group VPCE SSM
- 
+
 resource "aws_security_group" "vpce_ssm" {
   name   = "${var.environment}-sg-vpce_ssm"
   vpc_id = aws_vpc.vpc.id
@@ -301,7 +301,7 @@ resource "aws_security_group_rule" "vpce_ssm_accepts_analytics_requests" {
   protocol                 = "tcp"
   security_group_id        = aws_security_group.vpce_ssm.id
   source_security_group_id = aws_security_group.analytics.id
-} 
+}
 
 
 // VPCEs

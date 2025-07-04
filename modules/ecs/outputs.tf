@@ -6,6 +6,10 @@ output "alb_zone_id" {
   value = aws_lb.app.zone_id
 }
 
+output "alb_arn" {
+  value = aws_lb.app.arn
+}
+
 output "kms_aliases" {
   value = {
     for env_var_name, alias in local.kms :

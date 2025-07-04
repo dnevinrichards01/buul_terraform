@@ -1,3 +1,3 @@
 locals {
-    containers = ["app", "celery", "beat"]
+  containers = ["app", "celery", "beat"]
 }

@@ -11,12 +11,12 @@ terraform {
 provider "aws" {
   profile = "ab-nevin"
   region  = "us-west-1"
-  alias  = "us_west_1"
+  alias   = "us_west_1"
 }
 
 provider "aws" {
   profile = "ab-nevin"
   region  = "us-west-2"
-  alias  = "us_west_2"
+  alias   = "us_west_2"
 }
 

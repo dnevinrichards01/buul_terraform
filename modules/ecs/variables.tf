@@ -1,10 +1,10 @@
 variable "environment" {
-  type = string
+  type    = string
   default = "prod"
 }
 
 variable "region" {
-  type = string
+  type    = string
   default = "us-west-1"
 }
 
@@ -16,11 +16,11 @@ variable "desired_counts_by_service" {
   type = map(number)
 }
 
-variable "alb_subnet_ids" { 
+variable "alb_subnet_ids" {
   type = list(string)
 }
 
-variable "app_subnet_ids" { 
+variable "app_subnet_ids" {
   type = list(string)
 }
 
@@ -36,7 +36,7 @@ variable "app_security_group_id" {
   type = string
 }
 
-variable "data_security_group_id" { 
+variable "data_security_group_id" {
   type = string
 }
 
@@ -62,4 +62,8 @@ variable "acm_cert_arn" {
 
 variable "vpce_ids" {
   type = map(string)
+}
+
+variable "monitoring_logs_bucket_id" {
+  type = string
 }

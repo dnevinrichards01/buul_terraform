@@ -7,7 +7,7 @@ variable "environment" {
 }
 
 variable "domain" {
-  type        = string
+  type = string
 }
 
 variable "hosted_zone_id" {

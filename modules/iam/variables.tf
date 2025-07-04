@@ -49,3 +49,26 @@ variable "secret_kms_ids" {
 variable "ecs_kms_arns" {
   type = list(string)
 }
+
+variable "monitoring_logs_bucket_arns" {
+  type = list(string)
+}
+
+variable "cloudtrail_bucket_arn" {
+  type = string
+}
+
+
+variable "codebuild_kms_arns" {
+  type = list(string)
+}
+
+variable "codebuild_ssm_arns" {
+  type = list(string)
+}
+
+variable "codebuild_secrets_arns" {
+  type = list(string)
+}
+
+

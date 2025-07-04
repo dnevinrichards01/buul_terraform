@@ -1,6 +1,6 @@
 resource "aws_ecr_repository" "repos" {
-  for_each = toset(local.repos)
-  name     = "${var.environment}-${each.value}"
+  for_each     = toset(local.repos)
+  name         = "${var.environment}-${each.value}"
   force_delete = true
 
   image_scanning_configuration {
@@ -11,16 +11,16 @@ resource "aws_ecr_repository" "repos" {
   tags = {
     Name        = "${var.environment}-${each.value}"
     Environment = var.environment
-    Image = each.value
+    Image       = each.value
   }
-} 
+}
 resource "aws_ecr_repository_policy" "resource_policy" {
-  for_each      = toset(local.repos)
+  for_each   = toset(local.repos)
   repository = aws_ecr_repository.repos[each.value].name
   policy     = data.aws_iam_policy_document.resource_policy[each.value].json
 }
 data "aws_iam_policy_document" "resource_policy" {
-  for_each      = toset(local.repos)
+  for_each = toset(local.repos)
   statement {
     effect = "Allow"
     principals {

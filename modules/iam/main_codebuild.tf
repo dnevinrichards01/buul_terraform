@@ -16,14 +16,14 @@ resource "aws_iam_role" "codebuild_role" {
 }
 
 resource "aws_iam_policy" "describe_task_definitions" {
-  name        = "${var.environment}-codebuild-describe-task-definitions"
-  policy      = jsonencode({
+  name = "${var.environment}-codebuild-describe-task-definitions"
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "VisualEditor0"
-        Effect = "Allow"
-        Action = "ecs:DescribeTaskDefinition"
+        Sid      = "VisualEditor0"
+        Effect   = "Allow"
+        Action   = "ecs:DescribeTaskDefinition"
         Resource = "*"
       }
     ]
@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "codebuild_service_role_basics" {
   }
 }
 resource "aws_iam_policy" "codebuild_service_role_basics" {
-  name        = "${var.environment}-codebuild-service-role-basics"
+  name   = "${var.environment}-codebuild-service-role-basics"
   policy = data.aws_iam_policy_document.codebuild_service_role_basics.json
 }
 resource "aws_iam_role_policy_attachment" "attach_codebuild_service_role_basics" {
@@ -111,7 +111,7 @@ data "aws_iam_policy_document" "codebuild_code_connection_access" {
   }
 }
 resource "aws_iam_policy" "codebuild_code_connection_access" {
-  name        = "${var.environment}-codebuild-code-connection-access"
+  name   = "${var.environment}-codebuild-code-connection-access"
   policy = data.aws_iam_policy_document.codebuild_code_connection_access.json
 }
 resource "aws_iam_role_policy_attachment" "codebuild_code_connection_access" {
@@ -123,12 +123,12 @@ resource "aws_iam_role_policy_attachment" "codebuild_code_connection_access" {
 resource "aws_iam_policy" "vpc_network_interface_access" {
   name        = "${var.environment}-codebuild-vpc_network_interface_access"
   description = "Policy for VPC network interface access"
-  policy      = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ec2:CreateNetworkInterface",
           "ec2:DescribeDhcpOptions",
           "ec2:DescribeNetworkInterfaces",
@@ -137,14 +137,14 @@ resource "aws_iam_policy" "vpc_network_interface_access" {
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeVpcs"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ec2:CreateNetworkInterfacePermission"
         ],
-        "Resource": "arn:aws:ec2:*:${data.aws_caller_identity.current.account_id}:network-interface/*"
+        "Resource" : "arn:aws:ec2:*:${data.aws_caller_identity.current.account_id}:network-interface/*"
       }
     ]
   })
@@ -160,7 +160,48 @@ resource "aws_iam_role_policy_attachment" "codebuild_basic" {
   policy_arn = "arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds"
 }
 
+resource "aws_iam_policy" "codebuild_secrets_access" {
+  name   = "${var.environment}-codebuild-secrets-ssm-access"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "SecretsManagerRead"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = var.codebuild_secrets_arns
+      },
+      {
+        Sid    = "SSMParameterRead"
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:DescribeParameters"
+        ]
+        Resource = var.codebuild_ssm_arns
+      },
+      {
+        Sid    = "KMSDecrypt"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey"
+        ]
+        Resource = var.codebuild_kms_arns
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "codebuild_secrets_access" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = aws_iam_policy.codebuild_secrets_access.arn
+}
 
 
 data "aws_caller_identity" "current" {}
+
 

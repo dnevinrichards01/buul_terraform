@@ -1,12 +1,12 @@
 // subnets
 
 resource "aws_subnet" "alb" {
-  vpc_id                  = var.vpc_id
-  cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10)
-  ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10)
-  map_public_ip_on_launch = true
+  vpc_id                          = var.vpc_id
+  cidr_block                      = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10)
+  ipv6_cidr_block                 = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10)
+  map_public_ip_on_launch         = true
   assign_ipv6_address_on_creation = true
-  availability_zone       = var.az
+  availability_zone               = var.az
 
   tags = {
     Name = "${var.environment}-alb-subnet-${var.az}"
@@ -14,12 +14,12 @@ resource "aws_subnet" "alb" {
 }
 
 resource "aws_subnet" "app" {
-  vpc_id                  = var.vpc_id
-  cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
-  ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
-  map_public_ip_on_launch = false
+  vpc_id                          = var.vpc_id
+  cidr_block                      = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
+  ipv6_cidr_block                 = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 1)
+  map_public_ip_on_launch         = false
   assign_ipv6_address_on_creation = true
-  availability_zone       = var.az
+  availability_zone               = var.az
 
   tags = {
     Name = "${var.environment}-app-subnet-${var.az}"
@@ -27,12 +27,12 @@ resource "aws_subnet" "app" {
 }
 
 resource "aws_subnet" "data" {
-  vpc_id            = var.vpc_id
-  cidr_block = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
-  ipv6_cidr_block         = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
-  map_public_ip_on_launch = false
+  vpc_id                          = var.vpc_id
+  cidr_block                      = cidrsubnet(var.vpc_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
+  ipv6_cidr_block                 = cidrsubnet(var.vpc_ipv6_cidr_block, 8, tonumber(var.az_index) * 10 + 2)
+  map_public_ip_on_launch         = false
   assign_ipv6_address_on_creation = true
-  availability_zone = var.az
+  availability_zone               = var.az
 
   tags = {
     Name = "${var.environment}-data-subnet-${var.az}"
@@ -52,7 +52,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.alb.id 
+  subnet_id     = aws_subnet.alb.id
 
   tags = {
     Name = "${var.environment}-${var.az}-nat-gateway"
@@ -60,12 +60,14 @@ resource "aws_nat_gateway" "nat" {
 }
 
 
+
+// why do we have app rt here? is nat by az and igw by region?
 resource "aws_route_table" "app" {
   vpc_id = var.vpc_id
 
   route {
     cidr_block = "0.0.0.0/0"
-    ipv6_cidr_block = "::/0"
+    //ipv6_cidr_block = "::/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
 
